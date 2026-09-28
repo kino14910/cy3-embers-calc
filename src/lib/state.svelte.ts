@@ -57,7 +57,8 @@ export const ui = $state({
 	theme: 'light' as 'light' | 'dark',
 	drawerClosed: false,
 	maskHidden: true,
-	toast: { msg: '', error: false, show: false }
+	toast: { msg: '', error: false, show: false },
+	dialog: { msg: '', show: false, onConfirm: null as null | (() => void) }
 });
 
 let toastTimer: ReturnType<typeof setTimeout> | undefined;
@@ -86,25 +87,25 @@ export function showToast(msg: string, opts: { error?: boolean; duration?: numbe
 
 export function lighten(hex: string, amount = 60): string {
 	const c = hex.replace('#', '');
-	const r = Math.min(255, parseInt(c.substr(0, 2), 16) + amount);
-	const g = Math.min(255, parseInt(c.substr(2, 2), 16) + amount);
-	const b = Math.min(255, parseInt(c.substr(4, 2), 16) + amount);
+	const r = Math.min(255, parseInt(c.slice(0, 2), 16) + amount);
+	const g = Math.min(255, parseInt(c.slice(2, 4), 16) + amount);
+	const b = Math.min(255, parseInt(c.slice(4, 6), 16) + amount);
 	return `rgb(${r},${g},${b})`;
 }
 
 export function darken(hex: string, amount = 40): string {
 	const c = hex.replace('#', '');
-	const r = Math.max(0, parseInt(c.substr(0, 2), 16) - amount);
-	const g = Math.max(0, parseInt(c.substr(2, 2), 16) - amount);
-	const b = Math.max(0, parseInt(c.substr(4, 2), 16) - amount);
+	const r = Math.max(0, parseInt(c.slice(0, 2), 16) - amount);
+	const g = Math.max(0, parseInt(c.slice(2, 4), 16) - amount);
+	const b = Math.max(0, parseInt(c.slice(4, 6), 16) - amount);
 	return `rgb(${r},${g},${b})`;
 }
 
 export function getContrastColor(hex: string): string {
 	const c = hex.replace('#', '');
-	const r = parseInt(c.substr(0, 2), 16);
-	const g = parseInt(c.substr(2, 2), 16);
-	const b = parseInt(c.substr(4, 2), 16);
+	const r = parseInt(c.slice(0, 2), 16);
+	const g = parseInt(c.slice(2, 4), 16);
+	const b = parseInt(c.slice(4, 6), 16);
 	const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 	return lum > 0.55 ? '#2A1810' : '#F4ECD8';
 }
@@ -470,10 +471,22 @@ export async function submitFeedback() {
 	}
 }
 
-export function abandonGame(opts: { silent?: boolean } = {}) {
+// ==================== 自定义确认弹窗 ====================
+export function openDialog(msg: string, onConfirm: () => void) {
+	ui.dialog.msg = msg;
+	ui.dialog.onConfirm = onConfirm;
+	ui.dialog.show = true;
+}
+
+export function closeDialog() {
+	ui.dialog.show = false;
+	ui.dialog.onConfirm = null;
+}
+
+export function reset(opts: { silent?: boolean } = {}) {
 	if (!opts.silent && game.running) {
-		const ok = window.confirm('确定要放弃当前对局并开始新的一局吗？');
-		if (!ok) return;
+		openDialog('确定要放弃当前对局并开始新的一局吗？', () => reset({ ...opts, silent: true }));
+		return;
 	}
 	game.running = false;
 	game.finished = false;
@@ -490,9 +503,10 @@ export function abandonGame(opts: { silent?: boolean } = {}) {
 }
 
 export function confirmClearSave() {
-	if (!window.confirm('确定要清除本地存档吗？此操作不影响当前进行中的对局显示，仅清空刷新后可恢复的存档。')) return;
-	clearSavedGame();
-	showToast('已清除存档');
+	openDialog('确定要清除本地存档吗？此操作不影响当前进行中的对局显示，仅清空刷新后可恢复的存档。', () => {
+		clearSavedGame();
+		showToast('已清除存档');
+	});
 }
 
 // ==================== 分享 / 导出记录 ====================

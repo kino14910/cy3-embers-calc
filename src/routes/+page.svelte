@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
 	import FeedbackCard from '$lib/components/FeedbackCard.svelte';
 	import GuessCard from '$lib/components/GuessCard.svelte';
 	import HistoryList from '$lib/components/HistoryList.svelte';
@@ -7,7 +8,7 @@
 	import SuccessBanner from '$lib/components/SuccessBanner.svelte';
 	import Toast from '$lib/components/Toast.svelte';
 	import {
-		abandonGame,
+		reset,
 		closeDrawer,
 		exportTranscript,
 		game,
@@ -91,7 +92,7 @@
 			<div class="play-stage">
 				<div class="action-row">
 					<button class="action-btn" type="button" onclick={exportTranscript}>📋 分享 / 导出记录</button>
-					<button class="action-btn" type="button" onclick={() => abandonGame()}>↺ 重置 / 新对局</button>
+					<button class="action-btn" type="button" onclick={() => reset()}>↺ 重置 / 新对局</button>
 				</div>
 
 				<div class="status-line">
@@ -144,6 +145,7 @@
 </div>
 
 <Toast />
+<ConfirmDialog />
 
 <style>
 	.app-shell {
@@ -199,6 +201,24 @@
 		max-width: 720px;
 		margin: 0 auto;
 		width: 100%;
+		/* 羊皮纸质感 · 中世纪神秘学手稿 */
+		background-color: var(--parchment);
+		background-image:
+			radial-gradient(ellipse at 18% 12%, rgba(139, 58, 31, 0.10), transparent 55%),
+			radial-gradient(ellipse at 82% 88%, rgba(90, 58, 26, 0.12), transparent 55%),
+			radial-gradient(ellipse at center, rgba(255, 246, 220, 0.35), rgba(196, 168, 110, 0.28)),
+			url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' seed='11'/><feColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.33 0 0 0 0 0.17 0 0 0 0.16 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>");
+		background-attachment: fixed;
+	}
+
+	/* 深色主题：午夜古卷质感（保留纤维纹理，整体压暗） */
+	:global([data-theme='dark']) .main-stage {
+		background-color: #1a120b;
+		background-image:
+			radial-gradient(ellipse at 18% 12%, rgba(210, 105, 30, 0.07), transparent 55%),
+			radial-gradient(ellipse at 82% 88%, rgba(139, 58, 31, 0.10), transparent 55%),
+			radial-gradient(ellipse at center, rgba(62, 44, 26, 0.35), rgba(16, 10, 5, 0.45)),
+			url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' seed='11'/><feColorMatrix values='0 0 0 0 0.55 0 0 0 0 0.42 0 0 0 0 0.24 0 0 0 0.10 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>");
 	}
 
 	.stage-header {
@@ -401,6 +421,11 @@
 	@media (min-width: 768px) {
 		.app-shell {
 			flex-direction: row;
+			/* 摊开的笔记本 */
+			max-width: 1560px;
+			margin: 0 auto;
+			width: 100%;
+			box-shadow: 0 0 60px rgba(20, 10, 4, 0.5);
 		}
 		.drawer-toggle {
 			display: none;
@@ -409,10 +434,47 @@
 			display: none !important;
 		}
 		.main-stage {
-			padding: 32px 48px 24px;
+			/* 与左侧等宽 */
+			flex: 1 1 0;
+			min-width: 0;
+			position: relative;
+			padding: 40px 56px 32px;
 			margin: 0;
 			max-width: none;
 			min-height: 100vh;
+			background-attachment: local;
+		}
+		/* 书籍装订中缝（靠左缘的内凹阴影 + 一道金线） */
+		.main-stage::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			left: 0;
+			width: 26px;
+			pointer-events: none;
+			background: linear-gradient(
+				to right,
+				rgba(20, 10, 4, 0.55),
+				rgba(42, 24, 16, 0.22) 40%,
+				rgba(42, 24, 16, 0) 100%
+			);
+		}
+		.main-stage::after {
+			content: '';
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			left: 26px;
+			width: 1px;
+			pointer-events: none;
+			background: linear-gradient(
+				to bottom,
+				rgba(201, 169, 97, 0),
+				rgba(201, 169, 97, 0.5) 12%,
+				rgba(201, 169, 97, 0.5) 88%,
+				rgba(201, 169, 97, 0)
+			);
 		}
 		.stage-title {
 			font-size: 28px;

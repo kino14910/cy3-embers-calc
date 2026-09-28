@@ -104,7 +104,7 @@
 			linear-gradient(180deg, rgba(42, 24, 16, 0.96), rgba(60, 36, 24, 0.96)),
 			url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><filter id='w'><feTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.6 0 0 0 0 0.45 0 0 0 0 0.25 0 0 0 0.15 0'/></filter><rect width='100%' height='100%' filter='url(%23w)'/></svg>");
 		color: var(--cream);
-		padding: 18px 18px 20px;
+		padding: 24px;
 		transform: translateX(0);
 		transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
 		z-index: 80;
@@ -215,11 +215,31 @@
 			position: sticky;
 			top: 0;
 			height: 100vh;
-			width: 340px;
+			/* 与右侧等宽 */
+			flex: 1 1 0;
+			width: auto;
+			max-width: none; 
 			flex-shrink: 0;
 			transform: none !important;
-			box-shadow: none;
-			border-right: 2px solid var(--brass);
+			/* border-right: 2px solid #6B4A2B; */
+			/* 牛皮笔记本封面质感 */
+			background-color: #33241A;
+			background-image:
+				radial-gradient(ellipse at 50% 0%, rgba(120, 84, 52, 0.35), transparent 60%),
+				radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.4)),
+				linear-gradient(180deg, rgba(74, 51, 34, 0.55), rgba(43, 28, 18, 0.7)),
+				url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='l'><feTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='4' seed='7'/><feColorMatrix values='0 0 0 0 0.16 0 0 0 0 0.10 0 0 0 0 0.05 0 0 0 0.5 0'/></filter><rect width='100%' height='100%' filter='url(%23l)'/></svg>");
+		}
+		/* 封面烫金双线框 */
+		.sidebar::before {
+			content: '';
+			position: absolute;
+			inset: 12px 20px 12px 12px;
+			border: 1px solid rgba(201, 169, 97, 0.35);
+			outline: 1px solid rgba(201, 169, 97, 0.14);
+			outline-offset: 3px;
+			border-radius: 3px;
+			pointer-events: none;
 		}
 	}
 </style>
