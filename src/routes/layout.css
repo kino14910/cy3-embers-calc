@@ -1,2 +1,133 @@
-@import 'tailwindcss';
-@plugin '@tailwindcss/forms';
+/* ==================== 全局变量 · 中世纪魔法工业风 ==================== */
+:root {
+  --parchment: #E8D9B0;
+  --parchment-dark: #DCC89A;
+  --wood-dark: #2A1810;
+  --wood-mid: #5C4033;
+  --brass: #A67C3F;
+  --gold: #C9A961;
+  --ember-orange: #D2691E;
+  --ember-red: #8B3A1F;
+  --cream: #F4ECD8;
+  --shadow: rgba(42, 24, 16, 0.35);
+  --iron: #4A4A4A;
+  --lead: #6B7B8C;
+  --silver: #C0C0C0;
+  --copper: #B87333;
+  --dawn: #F4D03F;
+  --tianhua: #5DADE2;
+
+  --page-bg: var(--parchment);
+  --text-ink: var(--wood-dark);
+  --text-mute: var(--wood-mid);
+  --card-top: var(--cream);
+  --card-bottom: var(--parchment);
+  --card-border: var(--brass);
+  --glass-alpha: 0.72;
+  --glass-blur: 14px;
+  --history-bg: rgba(244, 236, 216, 0.72);
+  --status-bg: rgba(42, 24, 16, 0.08);
+  --focus-ring: 3px solid #2F6FED;
+}
+
+:root[data-theme="dark"] {
+  --page-bg: #150F0A;
+  --text-ink: #F1E6CC;
+  --text-mute: #C9B99A;
+  --card-top: #2A2018;
+  --card-bottom: #1D160F;
+  --card-border: #8A6A3C;
+  --glass-alpha: 0.55;
+  --history-bg: rgba(42, 32, 22, 0.6);
+  --status-bg: rgba(0, 0, 0, 0.28);
+  --focus-ring: 3px solid #6FA8FF;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100%;
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans', sans-serif;
+  color: var(--text-ink);
+  background: var(--page-bg);
+  background-image:
+    radial-gradient(ellipse at top, rgba(166, 124, 63, 0.08), transparent 60%),
+    radial-gradient(ellipse at bottom, rgba(139, 58, 31, 0.06), transparent 60%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='3'/><feColorMatrix values='0 0 0 0 0.4 0 0 0 0 0.3 0 0 0 0 0.15 0 0 0 0.08 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-attachment: fixed;
+  overflow-x: hidden;
+  transition: background-color 300ms ease, color 300ms ease;
+}
+
+.display-font {
+  font-family: 'Palatino Linotype', 'Book Antiqua', 'Songti SC', 'STSong', 'Noto Serif SC', serif;
+}
+
+button { font-family: inherit; cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+
+/* ==================== 可访问性：可见焦点环 ==================== */
+a:focus-visible, button:focus-visible, [tabindex]:focus-visible, input:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+:focus:not(:focus-visible) { outline: none; }
+
+.hidden { display: none !important; }
+
+/* ==================== 侧栏设置区块（跨组件共享） ==================== */
+.settings-section {
+  background: rgba(244, 236, 216, 0.05);
+  border: 1px solid rgba(201, 169, 97, 0.2);
+  border-radius: 8px;
+  padding: 12px 14px;
+  transition: opacity 200ms ease, filter 200ms ease;
+}
+.settings-section.locked {
+  opacity: 0.4;
+  filter: grayscale(0.4);
+}
+.section-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.toggle-label {
+  font-size: 11px;
+  color: rgba(244, 236, 216, 0.55);
+  font-weight: 500;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+.mode-caption {
+  font-size: 10.5px;
+  color: rgba(244, 236, 216, 0.45);
+  margin-top: 8px;
+  line-height: 1.5;
+  letter-spacing: 0.5px;
+}
+.tiny-link-btn {
+  background: none;
+  border: none;
+  color: rgba(244, 236, 216, 0.5);
+  font-size: 10px;
+  text-decoration: underline;
+  letter-spacing: 0;
+  text-transform: none;
+  font-weight: 500;
+}
+.tiny-link-btn:active { color: var(--gold); }
+.tiny-link-btn:disabled { opacity: 0.5; }
+
+/* 减少动态偏好：尊重系统设置 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+}
