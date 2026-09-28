@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import { CLASSIC_PRESETS, PRIORITY_PRESETS } from '../data/data';
 	import { applyClassicPreset, clearClassicPreset, game } from '../state.svelte';
 
@@ -7,28 +8,92 @@
 	const prioritySet = new Set(PRIORITY_PRESETS);
 
 	let activePreset = $derived(game.classicPreset ? CLASSIC_PRESETS[game.classicPreset] : null);
-	// 绑定到原生 select 的选中值（Svelte 通过 property 同步 selected 状态）
-	let selectValue = $derived(game.classicPreset ?? '');
 
-	// 过滤框：隐藏的 option 原生 select 会自动跳过（不参与下拉与键盘导航）
+	let open = $state(false);
 	let query = $state('');
+	let activeIdx = $state(-1);
+	let inputEl: HTMLInputElement | null = null;
+
+	function attachInput(node: HTMLInputElement) {
+		inputEl = node;
+		return () => {
+			inputEl = null;
+		};
+	}
+
 	let filtered = $derived(
 		query.trim() ? orderedAll.filter((n) => n.toLowerCase().includes(query.trim().toLowerCase())) : orderedAll
 	);
-	let filteredSet = $derived(new Set(filtered));
-	let matchCount = $derived(filtered.length);
 
 	function metaFor(name: string): string {
 		const p = CLASSIC_PRESETS[name];
 		return `${p.numItems} 物品 · ${p.allSame ? '全同' : '标准'}`;
 	}
 
-	function onChange(e: Event) {
-		const sel = e.currentTarget as HTMLSelectElement;
-		const name = sel.value;
-		if (name) applyClassicPreset(name);
+	function scrollActiveIntoView() {
+		tick().then(() => document.getElementById(`preset-opt-${activeIdx}`)?.scrollIntoView({ block: 'nearest' }));
+	}
+
+	function openList() {
+		if (game.running || open) return;
+		open = true;
+		query = '';
+		activeIdx = -1;
+	}
+
+	function closeList() {
+		open = false;
+		query = '';
+		activeIdx = -1;
+	}
+
+	function toggleList() {
+		if (game.running) return;
+		if (open) {
+			closeList();
+		} else {
+			openList();
+			inputEl?.focus();
+		}
+	}
+
+	function select(name: string) {
+		applyClassicPreset(name);
+		closeList();
 		// 选中后取消焦点
-		sel.blur();
+		inputEl?.blur();
+	}
+
+	function onKeydown(e: KeyboardEvent) {
+		if (game.running) return;
+		if (!open && (e.key === 'ArrowDown' || e.key === 'Enter')) {
+			e.preventDefault();
+			openList();
+			return;
+		}
+		if (!open) return;
+		if (e.key === 'Escape') {
+			e.preventDefault();
+			closeList();
+		} else if (e.key === 'ArrowDown') {
+			e.preventDefault();
+			if (filtered.length) {
+				activeIdx = (activeIdx + 1) % filtered.length;
+				scrollActiveIntoView();
+			}
+		} else if (e.key === 'ArrowUp') {
+			e.preventDefault();
+			if (filtered.length) {
+				activeIdx = (activeIdx - 1 + filtered.length) % filtered.length;
+				scrollActiveIntoView();
+			}
+		} else if (e.key === 'Enter') {
+			e.preventDefault();
+			if (activeIdx >= 0 && filtered[activeIdx]) select(filtered[activeIdx]);
+			else if (filtered.length === 1) select(filtered[0]);
+		} else if (e.key === 'Tab') {
+			closeList();
+		}
 	}
 </script>
 
@@ -40,168 +105,183 @@
 		>
 	</div>
 
-	<input
-		class="filter-input"
-		type="search"
-		placeholder="搜索配方…"
-		aria-label="搜索配方"
-		disabled={game.running}
-		bind:value={query}
-	/>
-	<div class="filter-meta" class:hidden={!query.trim()}>{matchCount} 项匹配</div>
-
-	<select
-		class="preset-select"
-		aria-label="选择配方"
-		disabled={game.running}
-		bind:value={selectValue}
-		onchange={onChange}
+	<div
+		class="combo"
+		class:open
+		class:disabled={game.running}
+		onfocusout={(e) => {
+			if (!e.currentTarget.contains(e.relatedTarget as Node)) closeList();
+		}}
 	>
-		<button type="button">
-			<selectedcontent></selectedcontent>
-		</button>
+		<input
+			class="combo-input"
+			{@attach attachInput}
+			type="text"
+			role="combobox"
+			aria-expanded={open}
+			aria-controls="preset-listbox"
+			aria-autocomplete="list"
+			aria-activedescendant={activeIdx >= 0 ? `preset-opt-${activeIdx}` : undefined}
+			placeholder={game.classicPreset ?? '搜索或选择配方…'}
+			value={open ? query : (game.classicPreset ?? '')}
+			readonly={!open}
+			disabled={game.running}
+			aria-label="搜索或选择配方"
+			onfocus={openList}
+			oninput={(e) => {
+				query = e.currentTarget.value;
+				activeIdx = -1;
+			}}
+			onkeydown={onKeydown}
+		/>
+		<button
+			class="combo-arrow"
+			type="button"
+			tabindex="-1"
+			aria-label={open ? '收起配方列表' : '展开配方列表'}
+			disabled={game.running}
+			onclick={toggleList}>▾</button
+		>
 
-		<option value="" disabled hidden class="placeholder-opt">— 请选择配方 —</option>
-		{#each orderedAll as name (name)}
-			<option value={name} hidden={!filteredSet.has(name)}>
-				<span class="opt-name">{prioritySet.has(name) ? '★ ' : ''}{name}</span>
-				<span class="opt-meta">{metaFor(name)}</span>
-			</option>
-		{/each}
-	</select>
+		{#if open}
+			<ul class="combo-list" id="preset-listbox" role="listbox" aria-label="配方列表">
+				{#each filtered as name, i (name)}
+					<li
+						id={`preset-opt-${i}`}
+						class="combo-opt"
+						class:active={i === activeIdx}
+						class:selected={game.classicPreset === name}
+						role="option"
+						aria-selected={game.classicPreset === name}
+						onmouseenter={() => (activeIdx = i)}
+						onmousedown={(e) => {
+							e.preventDefault();
+							select(name);
+						}}
+					>
+						<span class="opt-name">{prioritySet.has(name) ? '★ ' : ''}{name}</span>
+						<span class="opt-meta">{metaFor(name)}</span>
+					</li>
+				{:else}
+					<li class="combo-empty">无匹配配方</li>
+				{/each}
+			</ul>
+		{/if}
+	</div>
+
+	<div class="preset-active-tag" class:hidden={!game.classicPreset}>
+		{#if game.classicPreset && activePreset}
+			当前配方：{game.classicPreset}（{activePreset.numItems} 物品 · {activePreset.allSame ? '全同模式' : '标准模式'}）
+		{/if}
+	</div>
 </div>
 
 <style>
-	/* 搜索框 */
-	.filter-input {
-		width: 100%;
+	/* ==================== 一体式可搜索下拉框 ==================== */
+	/* 外框：视觉上的唯一控件（背景/边框/圆角都在这里） */
+	.combo {
+		position: relative;
+		display: flex;
+		align-items: center;
 		background: #1a0f08;
 		border: 1px solid rgba(201, 169, 97, 0.4);
 		border-radius: 8px;
-		color: var(--cream);
-		padding: 8px 12px;
-		font-size: 13px;
-		font-weight: 600;
-		letter-spacing: 0.5px;
-		margin-bottom: 6px;
 		transition: border-color 200ms ease;
 	}
-	.filter-input::placeholder {
-		color: rgba(244, 236, 216, 0.4);
-	}
-	.filter-input:focus-visible {
+	.combo:focus-within {
 		border-color: var(--gold);
 	}
-	.filter-input:disabled {
+	/* 展开时：框底与列表贴合为一体 */
+	.combo.open {
+		border-color: var(--gold);
+		border-radius: 8px 8px 0 0;
+	}
+	.combo.disabled {
 		opacity: 0.5;
 	}
-	.filter-meta {
-		font-size: 10px;
-		color: rgba(244, 236, 216, 0.4);
-		margin: -2px 0 6px 2px;
-		letter-spacing: 0.5px;
-	}
 
-	/* ==================== 可定制 <select> ==================== */
-	/* 让 select 与其下拉选择器都进入 base-select 模式（去除 OS 原生样式） */
-	.preset-select,
-	::picker(select) {
-		appearance: base-select;
-	}
-
-	/* select 按钮（关闭态的框）：与 .filter-input 保持一致的框体样式 */
-	.preset-select {
-		width: 100%;
-		background: #1a0f08;
-		border: 1px solid rgba(201, 169, 97, 0.4);
-		border-radius: 8px;
+	/* 输入区：透明无边框，融入外框 */
+	.combo-input {
+		flex: 1;
+		min-width: 0;
+		background: transparent;
+		border: none;
 		color: var(--cream);
-		padding: 8px 12px;
+		padding: 8px 4px 8px 12px;
 		font-size: 13px;
 		font-weight: 600;
 		font-family: inherit;
 		letter-spacing: 0.5px;
-		line-height: normal;
-		transition: border-color 200ms ease;
-		cursor: pointer;
-		align-items: center;
 	}
-	.preset-select:hover,
-	.preset-select:focus-visible {
-		border-color: var(--gold);
+	.combo-input::placeholder {
+		color: rgba(244, 236, 216, 0.4);
 	}
-	.preset-select:disabled {
-		opacity: 0.5;
+	/* 焦点环由外框 focus-within 承担 */
+	.combo-input:focus,
+	.combo-input:focus-visible {
+		outline: none;
+	}
+	.combo-input:disabled {
 		cursor: not-allowed;
 	}
 
-	/* 按钮内的 selectedcontent：占满宽度并两端对齐名称/副信息 */
-	.preset-select selectedcontent {
-		flex: 1;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 8px;
-		min-width: 0;
-	}
-
-	/* 下拉箭头图标 */
-	.preset-select::picker-icon {
+	/* 下拉箭头（内嵌于框内右侧） */
+	.combo-arrow {
+		background: none;
+		border: none;
 		color: var(--gold);
 		font-size: 11px;
+		padding: 8px 12px 8px 6px;
 		transition: rotate 240ms ease;
+		flex-shrink: 0;
 	}
-	.preset-select:open::picker-icon {
+	.combo-arrow:focus,
+	.combo-arrow:focus-visible {
+		outline: none;
+	}
+	.combo.open .combo-arrow {
 		rotate: 180deg;
 	}
 
-	/* 下拉选择器（popover，自动提升到顶层并锚定到按钮） */
-	.preset-select::picker(select) {
-		background: #221408;
-		border: 1px solid var(--brass);
-		border-radius: 8px;
-		box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-		margin-top: 4px;
-		max-height: 260px;
+	/* 下拉列表：与外框下沿无缝贴合 */
+	.combo-list {
+		position: absolute;
+		top: 100%;
+		left: -1px;
+		right: -1px;
+		max-height: 240px;
 		overflow-y: auto;
+		background: #1a0f08;
+		border: 1px solid var(--gold);
+		border-top: 1px solid rgba(201, 169, 97, 0.3);
+		border-radius: 0 0 8px 8px;
+		list-style: none;
+		z-index: 40;
+		box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
 		scrollbar-width: thin;
 		scrollbar-color: var(--brass) transparent;
 	}
-
-	/* 选项 */
-	.preset-select option {
+	.combo-opt {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: 8px;
-		padding: 9px 12px;
+		padding: 8px 12px;
 		font-size: 12.5px;
 		color: var(--cream);
-		background: transparent;
+		cursor: pointer;
 		border-bottom: 1px solid rgba(201, 169, 97, 0.15);
 	}
-	.preset-select option:last-of-type {
+	.combo-opt:last-child {
 		border-bottom: none;
 	}
-	.preset-select option:hover,
-	.preset-select option:focus {
+	.combo-opt.active {
 		background: rgba(201, 169, 97, 0.22);
 	}
-	/* 当前选中项 */
-	.preset-select option:checked {
+	.combo-opt.selected {
 		background: rgba(201, 169, 97, 0.32);
 		font-weight: 700;
 	}
-	/* 选中对勾 */
-	.preset-select option::checkmark {
-		color: var(--gold);
-	}
-	/* 占位项 */
-	.preset-select option.placeholder-opt {
-		color: rgba(244, 236, 216, 0.45);
-	}
-
-	/* 选项内名称 / 副信息（按钮内被克隆后也复用） */
 	.opt-name {
 		letter-spacing: 0.5px;
 		overflow: hidden;
@@ -213,5 +293,21 @@
 		color: rgba(244, 236, 216, 0.45);
 		white-space: nowrap;
 		flex-shrink: 0;
+	}
+	.combo-empty {
+		padding: 12px;
+		font-size: 12px;
+		color: rgba(244, 236, 216, 0.4);
+		text-align: center;
+	}
+
+	.preset-active-tag {
+		margin-top: 8px;
+		font-size: 10.5px;
+		color: var(--gold);
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		flex-wrap: wrap;
 	}
 </style>
