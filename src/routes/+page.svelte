@@ -3,7 +3,6 @@
 	import FeedbackCard from '$lib/components/FeedbackCard.svelte';
 	import GuessCard from '$lib/components/GuessCard.svelte';
 	import HistoryList from '$lib/components/HistoryList.svelte';
-	import PickerSheet from '$lib/components/PickerSheet.svelte';
 	import Sidebar from '$lib/components/Sidebar.svelte';
 	import SuccessBanner from '$lib/components/SuccessBanner.svelte';
 	import Toast from '$lib/components/Toast.svelte';
@@ -24,14 +23,14 @@
 			name: '亮点',
 			tip: '元素与位置都对',
 			orbClass: 'highlight' as const,
-			tapAriaLabel: '点选亮点数量'
+			tapAriaLabel: '选择亮点数量'
 		},
 		{
 			key: 'pale' as const,
 			name: '苍白点',
 			tip: '元素对但位置错',
 			orbClass: 'pale' as const,
-			tapAriaLabel: '点选苍白点数量'
+			tapAriaLabel: '选择苍白点数量'
 		}
 	];
 	const allSameRows = [
@@ -40,7 +39,7 @@
 			name: '匹配数',
 			tip: '猜测与真实配方重合的元素总数',
 			orbClass: 'highlight' as const,
-			tapAriaLabel: '点选匹配数量'
+			tapAriaLabel: '选择匹配数量'
 		}
 	];
 
@@ -144,7 +143,6 @@
 	</main>
 </div>
 
-<PickerSheet />
 <Toast />
 
 <style>

@@ -57,23 +57,16 @@ export const ui = $state({
 	theme: 'light' as 'light' | 'dark',
 	drawerClosed: false,
 	maskHidden: true,
-	toast: { msg: '', error: false, show: false },
-	pickerTarget: null as 'highlight' | 'pale' | 'match' | null
+	toast: { msg: '', error: false, show: false }
 });
 
-let pickerReturnFocusEl: HTMLElement | null = null;
 let toastTimer: ReturnType<typeof setTimeout> | undefined;
 
-// ==================== DOM 引用注册（由组件 attachment 写入，用于滚动 / 聚焦副作用） ====================
+// ==================== DOM 引用注册（由组件 attachment 写入，用于滚动副作用） ====================
 let historyCardEl: HTMLElement | null = null;
-let pickerSheetEl: HTMLElement | null = null;
 
 export function registerHistoryCard(el: HTMLElement | null) {
 	historyCardEl = el;
-}
-
-export function registerPickerSheet(el: HTMLElement | null) {
-	pickerSheetEl = el;
 }
 
 function scrollHistoryToBottom() {
@@ -370,36 +363,19 @@ export function toggleDrawer() {
 	else closeDrawer();
 }
 
-// ==================== 数字选择器 ====================
-export function pickerMaxFor(target: 'highlight' | 'pale' | 'match'): number {
+// ==================== 反馈数值录入（行内圆点直选） ====================
+export function feedbackMaxFor(target: 'highlight' | 'pale' | 'match'): number {
 	const n = game.positions;
 	if (target === 'match') return n;
 	const other = target === 'highlight' ? game.pale : game.highlight;
 	return n - other;
 }
 
-export function openPicker(target: 'highlight' | 'pale' | 'match', triggerEl?: HTMLElement) {
-	ui.pickerTarget = target;
-	pickerReturnFocusEl = triggerEl || null;
-	tick().then(() => {
-		const first = pickerSheetEl?.querySelector<HTMLButtonElement>('.picker-cell:not(:disabled)');
-		if (first) first.focus();
-	});
-}
-
-export function closePicker() {
-	ui.pickerTarget = null;
-	if (pickerReturnFocusEl) {
-		pickerReturnFocusEl.focus();
-		pickerReturnFocusEl = null;
-	}
-}
-
-export function pickValue(val: number) {
-	if (ui.pickerTarget === 'highlight') game.highlight = val;
-	else if (ui.pickerTarget === 'pale') game.pale = val;
-	else if (ui.pickerTarget === 'match') game.matchCount = val;
-	closePicker();
+export function setFeedbackValue(target: 'highlight' | 'pale' | 'match', val: number) {
+	const v = Math.max(0, Math.min(val, feedbackMaxFor(target)));
+	if (target === 'highlight') game.highlight = v;
+	else if (target === 'pale') game.pale = v;
+	else game.matchCount = v;
 }
 
 // ==================== 流程控制：开始 / 提交 / 重置 ====================
