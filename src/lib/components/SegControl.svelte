@@ -3,23 +3,21 @@
 		options: { val: string; label: string }[];
 		value: string;
 		ariaLabel: string;
-		locked?: boolean;
 		onselect: (val: string) => void;
 	}
-	let { options, value, ariaLabel, locked = false, onselect }: Props = $props();
+	let { options, value, ariaLabel, onselect }: Props = $props();
 
 	let activeIdx = $derived(Math.max(0, options.findIndex((o) => o.val === value)));
 	let sliderWidth = $derived(`calc(${100 / options.length}% - ${options.length === 2 ? 3 : 2}px)`);
 </script>
 
-<div class="seg-control" class:locked role="group" aria-label={ariaLabel}>
+<div class="seg-control" role="group" aria-label={ariaLabel}>
 	{#each options as opt (opt.val)}
 		<button
 			class="seg-opt"
 			class:active={opt.val === value}
 			data-val={opt.val}
 			type="button"
-			disabled={locked}
 			onclick={() => onselect(opt.val)}>{opt.label}</button
 		>
 	{/each}
@@ -59,9 +57,6 @@
 		color: #2a1708;
 		text-shadow: 0 1px 0 rgba(255, 240, 200, 0.45);
 	}
-	.seg-opt:disabled {
-		opacity: 0.5;
-	}
 	.seg-slider {
 		position: absolute;
 		top: 3px;
@@ -76,10 +71,6 @@
 			inset 0 1px 0 rgba(255, 245, 210, 0.75),
 			inset 0 -2px 0 rgba(120, 70, 10, 0.6),
 			0 0 10px rgba(242, 193, 78, 0.4);
-	}
-	.seg-control.locked {
-		opacity: 0.4;
-		filter: grayscale(0.4);
 	}
 	@media (min-width: 768px) {
 		.seg-opt {

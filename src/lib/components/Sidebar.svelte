@@ -3,6 +3,7 @@
 	import {
 		confirmClearSave,
 		game,
+		isDraftDirty,
 		setAlgorithm,
 		setMode,
 		startGame,
@@ -49,24 +50,22 @@
 		</div>
 	</div>
 
-	<div class="settings-section" class:locked={game.running}>
+	<div class="settings-section">
 		<div class="toggle-label">推演算法</div>
 		<SegControl
 			options={algoOptions}
 			value={game.algorithm}
 			ariaLabel="推演算法选择"
-			locked={game.running}
 			onselect={(v) => setAlgorithm(v as Algorithm)}
 		/>
 	</div>
 
-	<div class="settings-section" class:locked={game.running}>
+	<div class="settings-section">
 		<div class="toggle-label">配方模式</div>
 		<SegControl
 			options={modeOptions}
 			value={game.mode}
 			ariaLabel="配方模式选择"
-			locked={game.running}
 			onselect={(v) => setMode(v as Mode)}
 		/>
 		<div class="mode-caption">{captions[game.mode]}</div>
@@ -75,17 +74,22 @@
 	<PresetPanels />
 	<SameItemPresetGrid />
 
-	<div class="settings-section" class:hidden={game.mode === 'sameitem'} class:locked={game.running}>
+	<div class="settings-section" class:hidden={game.mode === 'sameitem'}>
 		<div class="section-title">物品数量</div>
 		<PositionGrid />
 	</div>
 
-	<div class="settings-section" class:locked={game.running}>
+	<div class="settings-section">
 		<div class="section-title">元素（至少选 2 种）</div>
 		<ElementGrid />
 	</div>
 
-	<button class="start-btn" type="button" disabled={game.running} onclick={startGame}>开 始 推 测</button>
+	<button class="start-btn" type="button" onclick={() => startGame()}>
+		{game.running ? '重 新 开 局' : '开 始 推 测'}
+	</button>
+	{#if isDraftDirty()}
+		<div class="dirty-hint">参数已修改 · 重新开局后生效</div>
+	{/if}
 
 	<div class="sidebar-footer">
 		<button class="footer-link-btn" type="button" onclick={confirmClearSave}>清除存档</button>
@@ -246,6 +250,26 @@
 		display: flex;
 		gap: 8px;
 		justify-content: center;
+	}
+	/* 草稿待生效提示 */
+	.dirty-hint {
+		text-align: center;
+		font-size: 10.5px;
+		color: var(--dawnstone);
+		letter-spacing: 2px;
+		opacity: 0.85;
+		margin-top: -6px;
+		text-shadow: 0 0 6px rgba(242, 193, 78, 0.35);
+		animation: dirtyBlink 2s steps(2) infinite;
+	}
+	@keyframes dirtyBlink {
+		0%,
+		100% {
+			opacity: 0.85;
+		}
+		50% {
+			opacity: 0.45;
+		}
 	}
 	.footer-link-btn {
 		background: none;

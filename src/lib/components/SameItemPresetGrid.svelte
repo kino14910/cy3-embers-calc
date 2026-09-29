@@ -3,7 +3,7 @@
 	import { applySameItemPreset, game } from '../state.svelte';
 </script>
 
-<div class="settings-section" class:hidden={game.mode !== 'sameitem'} class:locked={game.running}>
+<div class="settings-section" class:hidden={game.mode !== 'sameitem'}>
 	<div class="section-title">物品排列</div>
 	<div class="preset-grid">
 		{#each Object.keys(SAME_ITEM_PRESETS) as name (name)}
@@ -11,7 +11,6 @@
 				type="button"
 				class="preset-cell"
 				class:active={game.sameItemPreset === name}
-				disabled={game.running}
 				onclick={() => applySameItemPreset(name)}>{name}</button
 			>
 		{/each}
@@ -50,11 +49,7 @@
 			inset 0 -2px 0 rgba(110, 30, 0, 0.55),
 			0 0 12px rgba(255, 106, 31, 0.5);
 	}
-	.preset-cell:active:not(:disabled) {
+	.preset-cell:active {
 		transform: translateY(1px);
-	}
-	.preset-cell:disabled {
-		opacity: 0.35;
-		cursor: not-allowed;
 	}
 </style>

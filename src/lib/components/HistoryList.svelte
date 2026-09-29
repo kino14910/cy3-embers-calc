@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { ELEMENTS } from '../data/data';
-	import { elementLabelFor, game, getContrastColor, lighten, registerHistoryCard } from '../state.svelte';
+	import { activeElementLabelFor, game, getContrastColor, lighten, registerHistoryCard } from '../state.svelte';
 
-	let showItem = $derived(game.mode !== 'standard');
+	let showItem = $derived(game.active.mode !== 'standard');
 	let visible = $derived(game.history.length > 0 || !!game.currentGuess);
 
 	function blockStyle(idx: number): string {
@@ -30,11 +30,11 @@
 								{@const color = ELEMENTS[idx].color}
 								<div class="hist-block" style={blockStyle(idx)}>
 									<span class="hist-block-name" style="color:{getContrastColor(color)}"
-										>{elementLabelFor(idx)}</span
+										>{activeElementLabelFor(idx)}</span
 									>
 									{#if showItem}
 										<span class="hist-block-item" style="color:{getContrastColor(color)}"
-											>{game.items[pos]}</span
+											>{game.active.items[pos]}</span
 										>
 									{/if}
 								</div>
@@ -67,11 +67,11 @@
 								{@const color = ELEMENTS[idx].color}
 								<div class="hist-block" style={blockStyle(idx)}>
 									<span class="hist-block-name" style="color:{getContrastColor(color)}"
-										>{elementLabelFor(idx)}</span
+										>{activeElementLabelFor(idx)}</span
 									>
 									{#if showItem}
 										<span class="hist-block-item" style="color:{getContrastColor(color)}"
-											>{game.items[pos]}</span
+											>{game.active.items[pos]}</span
 										>
 									{/if}
 								</div>
@@ -89,11 +89,11 @@
 								{@const color = ELEMENTS[idx].color}
 								<div class="hist-block" style={blockStyle(idx)}>
 									<span class="hist-block-name" style="color:{getContrastColor(color)}"
-										>{elementLabelFor(idx)}</span
+										>{activeElementLabelFor(idx)}</span
 									>
 									{#if showItem}
 										<span class="hist-block-item" style="color:{getContrastColor(color)}"
-											>{game.items[pos]}</span
+											>{game.active.items[pos]}</span
 										>
 									{/if}
 								</div>

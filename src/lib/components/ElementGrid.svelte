@@ -11,7 +11,6 @@
 			class="element-tile"
 			class:selected={game.enabledColors.includes(idx)}
 			aria-pressed={game.enabledColors.includes(idx)}
-			disabled={game.running}
 			onclick={() => toggleElement(idx)}
 		>
 			<div class="element-icon" style:background={orbGradient(idx)}></div>
@@ -44,10 +43,6 @@
 			inset 0 -2px 0 rgba(0, 0, 0, 0.5);
 		transition: all 180ms ease;
 		color: var(--cream);
-	}
-	.element-tile:disabled {
-		opacity: 0.4;
-		cursor: not-allowed;
 	}
 	.element-tile.selected {
 		background: linear-gradient(180deg, rgba(255, 138, 48, 0.22), rgba(198, 62, 16, 0.16));

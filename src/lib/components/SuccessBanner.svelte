@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { elementLabelFor, game, orbGradient } from '../state.svelte';
+	import { activeElementLabelFor, game, orbGradient } from '../state.svelte';
 
 	function spawnCelebration(container: HTMLElement) {
 		// 余烬喷发：方形火花粒子
@@ -30,7 +30,7 @@
 		{#each game.revealedSecret ?? [] as idx, i (i)}
 			<div class="success-answer-slot">
 				<div class="success-orb" style:background={orbGradient(idx)}></div>
-				<div class="success-orb-name">{elementLabelFor(idx)}</div>
+				<div class="success-orb-name">{activeElementLabelFor(idx)}</div>
 			</div>
 		{/each}
 	</div>

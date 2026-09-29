@@ -16,6 +16,8 @@ export interface GameState {
 	classicPreset: string | null;
 	enabledColors: number[];
 	elementLabels: Record<number, string> | null;
+	/** 本局生效参数快照：startGame 时从草稿冻结，对局中修改草稿不影响当前对局 */
+	active: ActiveGameParams;
 	S: number[][];
 	allCombos: number[][];
 	currentGuess: number[] | null;
@@ -30,6 +32,17 @@ export interface GameState {
 	computing: boolean;
 }
 
+export interface ActiveGameParams {
+	algorithm: Algorithm;
+	mode: Mode;
+	positions: number;
+	items: string[];
+	sameItemPreset: string;
+	classicPreset: string | null;
+	enabledColors: number[];
+	elementLabels: Record<number, string> | null;
+}
+
 export const game: GameState = $state({
 	algorithm: 'minimax',
 	mode: 'standard',
@@ -39,6 +52,16 @@ export const game: GameState = $state({
 	classicPreset: null,
 	enabledColors: [],
 	elementLabels: null,
+	active: {
+		algorithm: 'minimax',
+		mode: 'standard',
+		positions: 4,
+		items: ['A', 'B', 'C', 'D'],
+		sameItemPreset: 'AABB',
+		classicPreset: null,
+		enabledColors: [],
+		elementLabels: null
+	},
 	S: [],
 	allCombos: [],
 	currentGuess: null,
@@ -62,6 +85,9 @@ export const ui = $state({
 });
 
 let toastTimer: ReturnType<typeof setTimeout> | undefined;
+
+// 推演令牌：重置/重开时递增，用于丢弃已过期的异步推演结果
+let computeToken = 0;
 
 // ==================== DOM 引用注册（由组件 attachment 写入，用于滚动副作用） ====================
 let historyCardEl: HTMLElement | null = null;
@@ -110,8 +136,16 @@ export function getContrastColor(hex: string): string {
 	return lum > 0.55 ? '#2A1810' : '#F4ECD8';
 }
 
+// 草稿标签（侧栏元素网格等编辑场景）
 export function elementLabelFor(idx: number): string {
 	if (game.elementLabels && game.elementLabels[idx]) return game.elementLabels[idx];
+	return ELEMENTS[idx].name;
+}
+
+// 生效标签（对局内的推测/历史/揭晓展示，读取冻结快照）
+export function activeElementLabelFor(idx: number): string {
+	const labels = game.active.elementLabels;
+	if (labels && labels[idx]) return labels[idx];
 	return ELEMENTS[idx].name;
 }
 
@@ -143,11 +177,11 @@ function buildComputeState() {
 	return {
 		S: game.S,
 		allCombos: game.allCombos,
-		mode: game.mode,
-		positions: game.positions,
-		itemLabels: game.items,
-		colors: game.enabledColors,
-		algorithm: game.algorithm,
+		mode: game.active.mode,
+		positions: game.active.positions,
+		itemLabels: game.active.items,
+		colors: game.active.enabledColors,
+		algorithm: game.active.algorithm,
 		history: game.history
 	};
 }
@@ -185,14 +219,14 @@ export function saveGame() {
 			SAVE_GAME_KEY,
 			JSON.stringify({
 				version: 2,
-				mode: game.mode,
-				algorithm: game.algorithm,
-				positions: game.positions,
-				items: game.items,
-				sameItemPreset: game.sameItemPreset,
-				classicPreset: game.classicPreset,
-				enabledColors: game.enabledColors,
-				elementLabels: game.elementLabels,
+				mode: game.active.mode,
+				algorithm: game.active.algorithm,
+				positions: game.active.positions,
+				items: game.active.items,
+				sameItemPreset: game.active.sameItemPreset,
+				classicPreset: game.active.classicPreset,
+				enabledColors: game.active.enabledColors,
+				elementLabels: game.active.elementLabels,
 				history: game.history,
 				currentGuess: game.currentGuess,
 				round: game.round,
@@ -241,6 +275,17 @@ export function tryResumeGame(): boolean {
 		game.classicPreset = saved.classicPreset;
 		game.enabledColors = saved.enabledColors;
 		game.elementLabels = saved.elementLabels;
+		// 存档中的参数即本局生效参数；草稿同步展示同一套
+		game.active = {
+			algorithm: saved.algorithm,
+			mode: saved.mode,
+			positions: saved.positions,
+			items: saved.items.slice(),
+			sameItemPreset: saved.sameItemPreset,
+			classicPreset: saved.classicPreset,
+			enabledColors: saved.enabledColors.slice(),
+			elementLabels: saved.elementLabels ? { ...saved.elementLabels } : null
+		};
 		game.round = saved.round;
 		game.running = saved.running;
 		game.finished = saved.finished;
@@ -267,9 +312,8 @@ export function tryResumeGame(): boolean {
 	}
 }
 
-// ==================== 设置操作 ====================
+// ==================== 设置操作（编辑草稿参数，不影响进行中的对局） ====================
 export function applyClassicPreset(name: string) {
-	if (game.running) return;
 	const p = CLASSIC_PRESETS[name];
 	if (!p) return;
 	game.classicPreset = name;
@@ -289,34 +333,34 @@ export function applyClassicPreset(name: string) {
 }
 
 export function clearClassicPreset() {
-	if (game.running) return;
 	game.classicPreset = null;
 	game.elementLabels = null;
 }
 
 export function applySameItemPreset(name: string) {
-	if (game.running) return;
+	applySameItemPresetInternal(name);
+	savePrefs();
+}
+
+function applySameItemPresetInternal(name: string) {
 	const items = SAME_ITEM_PRESETS[name];
 	if (!items) return;
 	game.sameItemPreset = name;
 	game.items = items.slice();
 	game.positions = items.length;
-	savePrefs();
 }
 
 export function setAlgorithm(val: Algorithm) {
-	if (game.running) return;
 	game.algorithm = val;
 	savePrefs();
 }
 
 export function setMode(val: Mode) {
-	if (game.running) return;
 	game.mode = val;
 	game.classicPreset = null;
 	game.elementLabels = null;
 	if (game.mode === 'sameitem') {
-		applySameItemPreset(game.sameItemPreset);
+		applySameItemPresetInternal(game.sameItemPreset);
 	} else {
 		game.items = defaultItemsFor(game.mode, game.positions);
 	}
@@ -324,7 +368,6 @@ export function setMode(val: Mode) {
 }
 
 export function setPositions(val: number) {
-	if (game.running) return;
 	game.positions = val;
 	game.classicPreset = null;
 	game.elementLabels = null;
@@ -332,11 +375,25 @@ export function setPositions(val: number) {
 }
 
 export function toggleElement(idx: number) {
-	if (game.running) return;
 	const pos = game.enabledColors.indexOf(idx);
 	if (pos >= 0) game.enabledColors.splice(pos, 1);
 	else game.enabledColors.push(idx);
 	game.classicPreset = null;
+}
+
+/** 草稿参数是否与本局生效参数不一致（对局中修改了侧栏设置） */
+export function isDraftDirty(): boolean {
+	if (!game.running && !game.finished) return false;
+	const a = game.active;
+	return (
+		a.algorithm !== game.algorithm ||
+		a.mode !== game.mode ||
+		a.positions !== game.positions ||
+		a.sameItemPreset !== game.sameItemPreset ||
+		a.classicPreset !== game.classicPreset ||
+		a.items.join() !== game.items.join() ||
+		a.enabledColors.slice().sort().join() !== game.enabledColors.slice().sort().join()
+	);
 }
 
 // ==================== 主题 ====================
@@ -366,7 +423,7 @@ export function toggleDrawer() {
 
 // ==================== 反馈数值录入（行内圆点直选） ====================
 export function feedbackMaxFor(target: 'highlight' | 'pale' | 'match'): number {
-	const n = game.positions;
+	const n = game.active.positions;
 	if (target === 'match') return n;
 	const other = target === 'highlight' ? game.pale : game.highlight;
 	return n - other;
@@ -380,7 +437,11 @@ export function setFeedbackValue(target: 'highlight' | 'pale' | 'match', val: nu
 }
 
 // ==================== 流程控制：开始 / 提交 / 重置 ====================
-export function startGame() {
+export function startGame(force = false) {
+	if (game.running && !force) {
+		openDialog('以当前参数重新开局？当前对局进度将丢失。', () => startGame(true));
+		return;
+	}
 	if (game.enabledColors.length < 2) {
 		showToast('请至少启用 2 种元素', { error: true });
 		return;
@@ -390,6 +451,19 @@ export function startGame() {
 		showToast('当前设置无法生成候选组合', { error: true });
 		return;
 	}
+	computeToken++;
+	game.computing = false;
+	// 冻结草稿为本局生效参数（对局中修改侧栏设置不影响当前对局，重新开局时才应用）
+	game.active = {
+		algorithm: game.algorithm,
+		mode: game.mode,
+		positions: game.positions,
+		items: game.items.slice(),
+		sameItemPreset: game.sameItemPreset,
+		classicPreset: game.classicPreset,
+		enabledColors: game.enabledColors.slice(),
+		elementLabels: game.elementLabels ? { ...game.elementLabels } : null
+	};
 	game.S = game.allCombos.slice();
 	game.history = [];
 	game.round = 1;
@@ -419,15 +493,16 @@ function finishGame(secretGuess: number[]) {
 }
 
 export async function submitFeedback() {
+	const active = game.active;
 	let fb: Feedback;
-	if (game.mode === 'allsame') {
-		if (game.matchCount > game.positions) {
+	if (active.mode === 'allsame') {
+		if (game.matchCount > active.positions) {
 			showToast('匹配数不能超过物品数', { error: true });
 			return;
 		}
 		fb = game.matchCount;
 	} else {
-		if (game.highlight + game.pale > game.positions) {
+		if (game.highlight + game.pale > active.positions) {
 			showToast('亮点 + 苍白点 不能超过物品数', { error: true });
 			return;
 		}
@@ -436,7 +511,7 @@ export async function submitFeedback() {
 
 	if (!game.currentGuess) return;
 	const prevS = game.S;
-	const newS = prevS.filter((s) => feedbackEquals(getFeedback(game.currentGuess!, s, game.mode, game.items), fb));
+	const newS = prevS.filter((s) => feedbackEquals(getFeedback(game.currentGuess!, s, active.mode, active.items), fb));
 
 	if (newS.length === 0) {
 		showToast('反馈矛盾 · 无可能解 · 请核对输入', { error: true, duration: 2600 });
@@ -456,11 +531,13 @@ export async function submitFeedback() {
 
 	game.round++;
 	game.computing = true;
+	const token = ++computeToken;
 	scrollHistoryToBottom();
 	saveGame();
 
 	try {
 		const nextGuess = await computeNextGuess(buildComputeState());
+		if (token !== computeToken) return; // 期间参数已更改/对局已重置，丢弃过期推演结果
 		game.currentGuess = nextGuess;
 		game.computing = false;
 		scrollHistoryToBottom();
@@ -490,6 +567,8 @@ export function reset(opts: { silent?: boolean } = {}) {
 	}
 	game.running = false;
 	game.finished = false;
+	game.computing = false;
+	computeToken++;
 	game.history = [];
 	game.S = [];
 	game.currentGuess = null;
@@ -511,15 +590,22 @@ export function confirmClearSave() {
 
 // ==================== 分享 / 导出记录 ====================
 export function buildTranscript(): string {
+	const active = game.active;
 	const lines: string[] = [];
 	lines.push('余烬炼金 · 推演记录');
 	const modeLabel =
-		game.mode === 'standard' ? '标准' : game.mode === 'sameitem' ? `相同物品(${game.sameItemPreset})` : '全同';
-	lines.push(`配方模式：${modeLabel}${game.classicPreset ? '  经典配方：' + game.classicPreset : ''}`);
-	lines.push(`物品数：${game.positions}  算法：${game.algorithm === 'minimax' ? '保守' : '激进'}`);
+		active.mode === 'standard'
+			? '标准'
+			: active.mode === 'sameitem'
+				? `相同物品(${active.sameItemPreset})`
+				: '全同';
+	lines.push(
+		`配方模式：${modeLabel}${active.classicPreset ? '  经典配方：' + active.classicPreset : ''}`
+	);
+	lines.push(`物品数：${active.positions}  算法：${active.algorithm === 'minimax' ? '保守' : '激进'}`);
 	lines.push('----------------------------------------');
 	game.history.forEach((h, i) => {
-		const names = h.guess.map((idx) => elementLabelFor(idx)).join('-');
+		const names = h.guess.map((idx) => activeElementLabelFor(idx)).join('-');
 		const fbText =
 			typeof h.feedback === 'number'
 				? `匹配 ${h.feedback}`
@@ -528,7 +614,7 @@ export function buildTranscript(): string {
 	});
 	lines.push('----------------------------------------');
 	if (game.finished && game.revealedSecret) {
-		lines.push(`共 ${game.history.length} 回合，真名：${game.revealedSecret.map((idx) => elementLabelFor(idx)).join('-')}`);
+		lines.push(`共 ${game.history.length} 回合，真名：${game.revealedSecret.map((idx) => activeElementLabelFor(idx)).join('-')}`);
 	} else {
 		lines.push(`共 ${game.history.length} 回合，对局进行中（剩余可能 ${game.S.length} 解）`);
 	}

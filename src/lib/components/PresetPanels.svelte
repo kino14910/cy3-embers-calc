@@ -51,7 +51,7 @@
 	}
 
 	function openList() {
-		if (game.running || open) return;
+		if (open) return;
 		open = true;
 		query = '';
 		activeIdx = -1;
@@ -64,7 +64,6 @@
 	}
 
 	function toggleList() {
-		if (game.running) return;
 		if (open) {
 			closeList();
 		} else {
@@ -81,7 +80,6 @@
 	}
 
 	function onKeydown(e: KeyboardEvent) {
-		if (game.running) return;
 		if (!open && (e.key === 'ArrowDown' || e.key === 'Enter')) {
 			e.preventDefault();
 			openList();
@@ -113,10 +111,10 @@
 	}
 </script>
 
-<div class="settings-section" class:hidden={game.mode === 'sameitem'} class:locked={game.running}>
+<div class="settings-section" class:hidden={game.mode === 'sameitem'}>
 	<div class="section-title">
 		<span>常用配方</span>
-		<button class="tiny-link-btn" type="button" disabled={game.running} onclick={clearClassicPreset}
+		<button class="tiny-link-btn" type="button" onclick={clearClassicPreset}
 			>清除配方</button
 		>
 	</div>
@@ -124,7 +122,6 @@
 	<div
 		class="combo"
 		class:open
-		class:disabled={game.running}
 		onfocusout={(e) => {
 			if (!e.currentTarget.contains(e.relatedTarget as Node)) closeList();
 		}}
@@ -141,7 +138,6 @@
 			placeholder={game.classicPreset ?? '搜索或选择配方…'}
 			value={open ? query : (game.classicPreset ?? '')}
 			readonly={!open}
-			disabled={game.running}
 			aria-label="搜索或选择配方"
 			onfocus={openList}
 			oninput={(e) => {
@@ -155,7 +151,6 @@
 			type="button"
 			tabindex="-1"
 			aria-label={open ? '收起配方列表' : '展开配方列表'}
-			disabled={game.running}
 			onclick={toggleList}>▼</button
 		>
 
@@ -225,9 +220,6 @@
 		border-color: var(--dawnstone);
 		border-radius: 3px 3px 0 0;
 	}
-	.combo.disabled {
-		opacity: 0.5;
-	}
 
 	/* 输入区：透明无边框，融入外框 */
 	.combo-input {
@@ -249,9 +241,6 @@
 	.combo-input:focus,
 	.combo-input:focus-visible {
 		outline: none;
-	}
-	.combo-input:disabled {
-		cursor: not-allowed;
 	}
 
 	/* 下拉箭头（内嵌于框内右侧） */

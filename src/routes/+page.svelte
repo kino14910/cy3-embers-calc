@@ -46,7 +46,11 @@
 
 	let inGame = $derived(game.running || game.finished);
 	let itemPattern = $derived(
-		game.mode === 'sameitem' ? game.sameItemPreset : game.mode === 'allsame' ? '全同' : '标准'
+		game.active.mode === 'sameitem'
+			? game.active.sameItemPreset
+			: game.active.mode === 'allsame'
+				? '全同'
+				: '标准'
 	);
 
 	onMount(() => {
@@ -113,7 +117,7 @@
 					</div>
 					<div class="status-item">
 						<span class="status-key">算法</span><span class="status-val small"
-							>{game.algorithm === 'minimax' ? '保守' : '激进'}</span
+							>{game.active.algorithm === 'minimax' ? '保守' : '激进'}</span
 						>
 					</div>
 				</div>
@@ -126,7 +130,7 @@
 				<HistoryList />
 
 				{#if !game.finished}
-					{#if game.mode !== 'allsame'}
+					{#if game.active.mode !== 'allsame'}
 						<FeedbackCard rows={standardRows} />
 					{:else}
 						<FeedbackCard rows={allSameRows} />

@@ -11,7 +11,6 @@
 			class:active={game.positions === v}
 			data-val={v}
 			type="button"
-			disabled={game.running}
 			onclick={() => setPositions(v)}>{v}</button
 		>
 	{/each}
@@ -47,12 +46,8 @@
 			inset 0 -2px 0 rgba(110, 30, 0, 0.55),
 			0 0 12px rgba(255, 106, 31, 0.5);
 	}
-	.position-cell:active:not(:disabled) {
+	.position-cell:active {
 		transform: translateY(1px);
-	}
-	.position-cell:disabled {
-		opacity: 0.35;
-		cursor: not-allowed;
 	}
 	@media (min-width: 768px) {
 		.position-cell {

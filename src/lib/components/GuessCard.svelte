@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { elementLabelFor, game, orbGradient } from '../state.svelte';
+	import { activeElementLabelFor, game, orbGradient } from '../state.svelte';
 </script>
 
 {#if game.currentGuess && !game.finished}
@@ -10,7 +10,7 @@
 				{#each game.currentGuess as idx, i (i)}
 					<div class="guess-slot" style:animation-delay="{i * 60}ms">
 						<div class="slot-orb" style:background={orbGradient(idx)}></div>
-						<div class="slot-name">{elementLabelFor(idx)}</div>
+					<div class="slot-name">{activeElementLabelFor(idx)}</div>
 					</div>
 				{/each}
 			{/key}

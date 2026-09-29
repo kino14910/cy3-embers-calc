@@ -70,7 +70,7 @@
 				aria-label={row.tapAriaLabel}
 				onmouseleave={() => (hoverNext[row.key] = null)}
 			>
-				{#each { length: game.positions } as _, i (i)}
+				{#each { length: game.active.positions } as _, i (i)}
 					{@const enabled = i < max}
 					<button
 						type="button"
