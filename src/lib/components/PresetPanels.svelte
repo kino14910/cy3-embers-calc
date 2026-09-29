@@ -117,7 +117,7 @@
 	<div class="section-title">
 		<span>常用配方</span>
 		<button class="tiny-link-btn" type="button" disabled={game.running} onclick={clearClassicPreset}
-			>清除配方 ✕</button
+			>清除配方</button
 		>
 	</div>
 
@@ -156,7 +156,7 @@
 			tabindex="-1"
 			aria-label={open ? '收起配方列表' : '展开配方列表'}
 			disabled={game.running}
-			onclick={toggleList}>▾</button
+			onclick={toggleList}>▼</button
 		>
 
 		{#if open}
@@ -252,7 +252,12 @@
 		border: none;
 		color: var(--gold);
 		font-size: 11px;
-		padding: 8px 12px 8px 6px;
+		width: 32px;
+		padding: 0;
+		align-self: stretch;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		transition: rotate 240ms ease;
 		flex-shrink: 0;
 	}
