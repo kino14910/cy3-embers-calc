@@ -3,9 +3,25 @@
 	import { CLASSIC_PRESETS, PRIORITY_PRESETS } from '../data/data';
 	import { applyClassicPreset, clearClassicPreset, game } from '../state.svelte';
 
+	const presetIcons = import.meta.glob('$lib/assets/presets/*.png', {
+		eager: true,
+		import: 'default'
+	}) as Record<string, string>;
+
+	// glob 的 key 是完整路径（如 /src/lib/assets/presets/量子燃料.png），按文件名建立映射
+	const iconByKey: Record<string, string> = {};
+	for (const [path, url] of Object.entries(presetIcons)) {
+		const fileName = path.split('/').pop() ?? '';
+		if (fileName.endsWith('.png')) iconByKey[fileName.slice(0, -4)] = url;
+	}
+
 	const allNames = Object.keys(CLASSIC_PRESETS);
 	const orderedAll = [...PRIORITY_PRESETS, ...allNames.filter((n) => !PRIORITY_PRESETS.includes(n))];
 	const prioritySet = new Set(PRIORITY_PRESETS);
+
+	function iconFor(name: string): string | undefined {
+		return iconByKey[name];
+	}
 
 	let activePreset = $derived(game.classicPreset ? CLASSIC_PRESETS[game.classicPreset] : null);
 
@@ -159,7 +175,12 @@
 							select(name);
 						}}
 					>
-						<span class="opt-name">{prioritySet.has(name) ? '★ ' : ''}{name}</span>
+						<span class="opt-main">
+							{#if iconFor(name)}
+								<img class="opt-icon" src={iconFor(name)} alt="" loading="lazy" />
+							{/if}
+							<span class="opt-name">{prioritySet.has(name) ? '★ ' : ''}{name}</span>
+						</span>
 						<span class="opt-meta">{metaFor(name)}</span>
 					</li>
 				{:else}
@@ -281,6 +302,24 @@
 	.combo-opt.selected {
 		background: rgba(201, 169, 97, 0.32);
 		font-weight: 700;
+	}
+	.opt-main {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		min-width: 0;
+		flex: 1;
+	}
+	.opt-icon {
+		width: 22px;
+		height: 22px;
+		flex-shrink: 0;
+		object-fit: contain;
+		border-radius: 3px;
+		image-rendering: pixelated;
+		background: rgba(0, 0, 0, 0.25);
+		border: 1px solid rgba(201, 169, 97, 0.25);
+		padding: 1px;
 	}
 	.opt-name {
 		letter-spacing: 0.5px;
