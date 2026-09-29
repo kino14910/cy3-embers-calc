@@ -63,7 +63,7 @@
 					openTip = openTip === row.key ? null : row.key;
 				}}>{row.name}</button
 			>
-			<span class="feedback-count">{shown}</span>
+			<span class="feedback-count pixel-num">{shown}</span>
 			<div
 				class="feedback-display"
 				role="group"
@@ -94,13 +94,12 @@
 <style>
 	.feedback-card {
 		background: linear-gradient(180deg, var(--card-top) 0%, var(--card-bottom) 100%);
-		background-color: rgba(244, 236, 216, var(--glass-alpha));
-		backdrop-filter: blur(var(--glass-blur)) saturate(140%);
-		-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
 		border: 2px solid var(--card-border);
-		border-radius: 12px;
+		border-radius: 4px;
 		padding: 6px 16px;
-		box-shadow: 0 6px 18px var(--shadow);
+		box-shadow:
+			inset 0 1px 0 var(--card-hi),
+			0 4px 14px var(--shadow);
 		flex-shrink: 0;
 	}
 	.feedback-row {
@@ -109,8 +108,10 @@
 		gap: 12px;
 		padding: 14px 0;
 	}
+	/* 行间隔：刻槽脊线 */
 	.feedback-row:not(.first-row) {
-		border-top: 1px dashed rgba(166, 124, 63, 0.4);
+		border-top: 1px solid rgba(0, 0, 0, 0.55);
+		box-shadow: inset 0 1px 0 rgba(255, 170, 80, 0.08);
 	}
 	.feedback-name {
 		font-size: 14px;
@@ -133,10 +134,10 @@
 		left: 0;
 		transform: scale(0.9);
 		transform-origin: left bottom;
-		background: var(--wood-dark);
-		color: var(--cream);
+		background: #150d07;
+		color: var(--bone);
 		padding: 5px 10px;
-		border-radius: 5px;
+		border-radius: 2px;
 		font-size: 11px;
 		font-weight: 400;
 		letter-spacing: 0;
@@ -147,8 +148,10 @@
 			opacity 180ms ease,
 			transform 180ms ease;
 		z-index: 50;
-		border: 1px solid var(--gold);
-		box-shadow: 0 2px 6px var(--shadow);
+		border: 1px solid rgba(201, 149, 68, 0.55);
+		box-shadow:
+			0 4px 10px rgba(0, 0, 0, 0.5),
+			0 0 10px rgba(242, 193, 78, 0.18);
 	}
 	.feedback-name.show-tip::after {
 		opacity: 1;
@@ -162,11 +165,12 @@
 		flex-wrap: wrap;
 		min-height: 28px;
 	}
+	/* 反馈灯：方形符文灯芯（余烬/苍白/熄灭三态） */
 	.feedback-orb {
-		width: 22px;
-		height: 22px;
-		border-radius: 50%;
-		border: 1.5px solid rgba(42, 24, 16, 0.4);
+		width: 20px;
+		height: 20px;
+		border-radius: 3px;
+		border: 1px solid #000;
 		padding: 0;
 		flex-shrink: 0;
 		cursor: pointer;
@@ -176,28 +180,26 @@
 		animation: orbIn 240ms ease backwards;
 	}
 	.feedback-orb.highlight {
-		background: radial-gradient(circle at 30% 30%, #ffb347, #ff8c00 50%, #d2691e);
+		background: radial-gradient(circle at 32% 28%, #ffd98a, #ff7a1f 48%, var(--ember-deep) 88%);
 		box-shadow:
-			0 0 12px 3px rgba(255, 140, 0, 0.55),
-			inset 0 -2px 4px rgba(0, 0, 0, 0.25);
-		border-color: rgba(139, 58, 31, 0.6);
+			0 0 10px 2px rgba(255, 120, 20, 0.55),
+			inset 0 -2px 3px rgba(80, 15, 0, 0.5);
+		animation:
+			orbIn 240ms ease backwards,
+			orbFlicker 1.7s steps(3) infinite;
 	}
 	.feedback-orb.pale {
-		background: radial-gradient(circle at 30% 30%, #ffffff, #e8f3fb 55%, #bfe0f2);
+		background: radial-gradient(circle at 32% 28%, #ffffff, #cfe8f7 52%, #8fc3e4);
 		box-shadow:
-			0 0 10px 3px rgba(93, 173, 226, 0.5),
-			inset 0 -2px 4px rgba(0, 0, 0, 0.12);
-		border-color: rgba(93, 140, 173, 0.5);
+			0 0 9px 2px rgba(140, 200, 240, 0.45),
+			inset 0 -2px 3px rgba(20, 60, 90, 0.35);
 	}
 	.feedback-orb.dim {
-		background: radial-gradient(
-			circle at 30% 30%,
-			rgba(140, 130, 118, 0.5),
-			rgba(110, 102, 92, 0.45) 55%,
-			rgba(88, 80, 72, 0.4)
-		);
-		box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.12);
-		border-color: rgba(120, 110, 100, 0.35);
+		background: var(--socket);
+		border-color: rgba(255, 150, 60, 0.14);
+		box-shadow:
+			inset 0 2px 4px rgba(0, 0, 0, 0.85),
+			inset 0 -1px 0 rgba(255, 150, 60, 0.08);
 	}
 	.feedback-orb.preview {
 		opacity: 0.6;
@@ -211,7 +213,7 @@
 		opacity: 0.25;
 	}
 	.feedback-orb:focus-visible {
-		outline: 2px solid var(--ember-orange);
+		outline: 2px solid var(--ember-hot);
 		outline-offset: 2px;
 	}
 	@keyframes orbIn {
@@ -224,11 +226,24 @@
 			transform: scale(1);
 		}
 	}
+	@keyframes orbFlicker {
+		0%,
+		100% {
+			box-shadow:
+				0 0 10px 2px rgba(255, 120, 20, 0.55),
+				inset 0 -2px 3px rgba(80, 15, 0, 0.5);
+		}
+		50% {
+			box-shadow:
+				0 0 14px 4px rgba(255, 140, 30, 0.75),
+				inset 0 -2px 3px rgba(80, 15, 0, 0.5);
+		}
+	}
 	.feedback-count {
-		font-size: 18px;
-		font-weight: 700;
-		color: var(--ember-red);
-		min-width: 18px;
+		font-size: 12px;
+		color: var(--num-hot);
+		min-width: 20px;
 		text-align: center;
+		text-shadow: 0 0 8px rgba(255, 140, 40, 0.45);
 	}
 </style>

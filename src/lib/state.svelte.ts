@@ -572,8 +572,8 @@ export function initGame() {
 	const prefs0 = loadPrefs();
 	let theme = prefs0.theme;
 	if (theme !== 'light' && theme !== 'dark') {
-		theme =
-			window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+		// 余烬熔炉以「暗色背景」为基调：无存档偏好时默认余烬之夜
+		theme = 'dark';
 	}
 	applyTheme(theme as 'light' | 'dark');
 

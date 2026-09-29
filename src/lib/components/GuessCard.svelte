@@ -19,35 +19,36 @@
 {/if}
 
 <style>
+	/* 本回合推测：余烬熔接盘 */
 	.guess-card {
 		background: linear-gradient(180deg, var(--card-top) 0%, var(--card-bottom) 100%);
-		background-color: rgba(244, 236, 216, var(--glass-alpha));
-		backdrop-filter: blur(var(--glass-blur)) saturate(140%);
-		-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
 		border: 2px solid var(--card-border);
-		border-radius: 12px;
-		padding: 22px 16px 18px;
-		box-shadow: 0 6px 18px var(--shadow);
+		border-radius: 4px;
+		padding: 20px 16px 18px;
+		box-shadow:
+			inset 0 1px 0 var(--card-hi),
+			0 4px 14px var(--shadow);
 		position: relative;
 	}
 	.guess-card::before {
 		content: '';
 		position: absolute;
-		top: 6px;
-		left: 6px;
-		right: 6px;
-		bottom: 6px;
-		border: 1px solid rgba(166, 124, 63, 0.3);
-		border-radius: 8px;
+		top: 5px;
+		left: 5px;
+		right: 5px;
+		bottom: 5px;
+		border: 1px solid rgba(201, 149, 68, 0.22);
+		border-radius: 2px;
 		pointer-events: none;
 	}
 	.guess-label {
-		font-size: 11px;
-		color: var(--ember-red);
-		letter-spacing: 4px;
+		font-family: 'ZCOOL QingKe HuangYou', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+		font-size: 12px;
+		color: var(--num-hot);
+		letter-spacing: 5px;
 		text-align: center;
 		margin-bottom: 16px;
-		font-weight: 600;
+		text-shadow: 0 0 8px rgba(255, 140, 40, 0.4);
 	}
 	.guess-slots {
 		display: flex;
@@ -56,19 +57,21 @@
 		row-gap: 26px;
 		flex-wrap: wrap;
 	}
+	/* 方形熔接槽：内凹插座 */
 	.guess-slot {
-		width: 48px;
-		height: 48px;
+		width: 50px;
+		height: 50px;
 		margin-bottom: 12px;
-		border-radius: 50%;
-		border: 2px solid var(--brass);
-		background: var(--parchment-dark);
+		border-radius: 3px;
+		border: 1px solid #000;
+		background: var(--socket);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		box-shadow:
-			inset 0 -4px 8px rgba(0, 0, 0, 0.2),
-			0 2px 4px var(--shadow);
+			inset 0 2px 6px rgba(0, 0, 0, 0.85),
+			inset 0 -1px 0 rgba(255, 150, 60, 0.12),
+			0 1px 0 rgba(255, 170, 80, 0.07);
 		animation: slotIn 400ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
 		position: relative;
 	}
@@ -82,21 +85,24 @@
 			transform: translateY(0) scale(1);
 		}
 	}
+	/* 元素宝石：方块晶体贴片 */
 	.slot-orb {
-		width: 32px;
-		height: 32px;
-		border-radius: 50%;
-		border: 2px solid rgba(42, 24, 16, 0.4);
+		width: 36px;
+		height: 36px;
+		border-radius: 3px;
+		border: 1px solid rgba(0, 0, 0, 0.65);
 		box-shadow:
-			inset 0 -3px 6px rgba(0, 0, 0, 0.4),
-			inset 0 3px 6px rgba(255, 255, 255, 0.25);
+			inset 0 2px 0 rgba(255, 255, 255, 0.28),
+			inset 0 -3px 0 rgba(0, 0, 0, 0.4),
+			0 0 10px rgba(255, 140, 40, 0.3);
 	}
 	.slot-name {
 		position: absolute;
-		bottom: -18px;
+		bottom: -19px;
 		font-size: 10px;
 		color: var(--text-mute);
 		font-weight: 600;
+		letter-spacing: 1px;
 		white-space: nowrap;
 	}
 	@media (min-width: 768px) {
@@ -105,8 +111,8 @@
 			height: 64px;
 		}
 		.slot-orb {
-			width: 44px;
-			height: 44px;
+			width: 46px;
+			height: 46px;
 		}
 	}
 </style>

@@ -36,7 +36,7 @@
 		<div class="sidebar-title-row">
 			<div>
 				<div class="sidebar-title display-font">余烬炼金计算器</div>
-				<div class="sidebar-subtitle">EMBER · ALCHEMY · 2.0</div>
+				<div class="sidebar-subtitle pixel-num">EMBER · ALCHEMY · 2.0</div>
 			</div>
 			<div class="header-actions">
 				<button
@@ -100,9 +100,12 @@
 		bottom: 0;
 		width: 86vw;
 		max-width: 320px;
+		background-color: var(--wood-dark);
 		background-image:
-			linear-gradient(180deg, rgba(42, 24, 16, 0.96), rgba(60, 36, 24, 0.96)),
-			url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><filter id='w'><feTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.6 0 0 0 0 0.45 0 0 0 0 0.25 0 0 0 0.15 0'/></filter><rect width='100%' height='100%' filter='url(%23w)'/></svg>");
+			linear-gradient(180deg, rgba(34, 20, 10, 0.94), rgba(16, 9, 5, 0.97)),
+			repeating-conic-gradient(rgba(255, 255, 255, 0.018) 0% 25%, transparent 0% 50%),
+			url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><filter id='w'><feTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.55 0 0 0 0 0.35 0 0 0 0 0.15 0 0 0 0.12 0'/></filter><rect width='100%' height='100%' filter='url(%23w)'/></svg>");
+		background-size: auto, 4px 4px, 100px 100px;
 		color: var(--cream);
 		padding: 24px;
 		transform: translateX(0);
@@ -127,7 +130,23 @@
 
 	.sidebar-header {
 		padding-bottom: 12px;
-		border-bottom: 1px solid rgba(201, 169, 97, 0.3);
+		border-bottom: 1px solid rgba(201, 149, 68, 0.28);
+		position: relative;
+	}
+	/* 像素刻度线：标题栏下的余烬点阵 */
+	.sidebar-header::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: -5px;
+		height: 2px;
+		background: repeating-linear-gradient(
+			90deg,
+			rgba(255, 106, 31, 0.55) 0 4px,
+			transparent 4px 9px
+		);
+		opacity: 0.5;
 	}
 	.sidebar-title-row {
 		display: flex;
@@ -136,60 +155,91 @@
 		gap: 8px;
 	}
 	.sidebar-title {
-		font-size: 18px;
-		font-weight: 700;
-		color: var(--gold);
-		letter-spacing: 1px;
+		font-size: 21px;
+		letter-spacing: 2px;
+		background: linear-gradient(180deg, #ffe1a0 0%, var(--dawnstone) 45%, var(--ember) 90%);
+		-webkit-background-clip: text;
+		background-clip: text;
+		color: transparent;
+		filter: drop-shadow(0 2px 0 rgba(40, 12, 0, 0.85)) drop-shadow(0 0 10px rgba(255, 120, 30, 0.3));
 	}
 	.sidebar-subtitle {
-		font-size: 10px;
-		color: rgba(244, 236, 216, 0.5);
-		margin-top: 4px;
-		letter-spacing: 3px;
+		font-size: 7px;
+		color: var(--ash-dim);
+		margin-top: 7px;
+		letter-spacing: 2px;
 	}
 	.header-actions {
 		display: flex;
 		gap: 6px;
 		flex-shrink: 0;
 	}
+	/* 深色凸起方块按钮 */
 	.icon-btn {
 		width: 34px;
 		height: 34px;
-		border-radius: 7px;
-		background: rgba(244, 236, 216, 0.08);
-		border: 1px solid rgba(201, 169, 97, 0.35);
-		color: var(--gold);
+		border-radius: 3px;
+		background: linear-gradient(180deg, #26170b, #170d06);
+		border: 1px solid rgba(201, 149, 68, 0.45);
+		color: var(--dawnstone);
 		font-size: 15px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		transition: all 180ms ease;
+		box-shadow:
+			inset 0 1px 0 rgba(255, 190, 110, 0.18),
+			inset 0 -2px 0 rgba(0, 0, 0, 0.55),
+			0 2px 5px rgba(0, 0, 0, 0.4);
+		transition: all 160ms ease;
+		text-shadow: 0 0 8px rgba(242, 193, 78, 0.5);
 	}
 	.icon-btn:active {
-		transform: scale(0.9);
-		background: rgba(201, 169, 97, 0.25);
+		transform: translateY(1px) scale(0.95);
+		background: linear-gradient(180deg, #170d06, #26170b);
+		box-shadow:
+			inset 0 2px 4px rgba(0, 0, 0, 0.6),
+			0 0 10px rgba(255, 106, 31, 0.25);
 	}
 
+	/* 余烬主按钮：凸起热铁方块 */
 	.start-btn {
 		width: 100%;
 		padding: 14px;
-		background: linear-gradient(135deg, var(--ember-orange) 0%, var(--ember-red) 100%);
-		border: 1px solid var(--gold);
-		border-radius: 8px;
-		color: var(--cream);
-		font-size: 15px;
-		font-weight: 700;
-		letter-spacing: 3px;
-		box-shadow: 0 4px 12px rgba(139, 58, 31, 0.5);
-		transition: all 200ms ease;
+		background: linear-gradient(180deg, #ff8a30 0%, var(--ember) 45%, var(--ember-deep) 100%);
+		border: 2px solid #31170a;
+		border-radius: 3px;
+		color: #fff3d8;
+		font-family: 'ZCOOL QingKe HuangYou', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+		font-size: 16px;
+		letter-spacing: 5px;
+		text-shadow: 0 2px 0 rgba(70, 20, 0, 0.65);
+		box-shadow:
+			inset 0 2px 0 rgba(255, 210, 130, 0.5),
+			inset 0 -3px 0 rgba(110, 30, 0, 0.55),
+			0 0 16px rgba(255, 106, 31, 0.35),
+			0 4px 10px var(--shadow);
+		transition: all 180ms ease;
 		margin-top: auto;
+	}
+	.start-btn:hover:not(:disabled) {
+		filter: brightness(1.08);
+		box-shadow:
+			inset 0 2px 0 rgba(255, 210, 130, 0.5),
+			inset 0 -3px 0 rgba(110, 30, 0, 0.55),
+			0 0 24px rgba(255, 106, 31, 0.55),
+			0 4px 10px var(--shadow);
 	}
 	.start-btn:active {
 		transform: translateY(2px);
-		box-shadow: 0 2px 6px rgba(139, 58, 31, 0.5);
+		box-shadow:
+			inset 0 2px 5px rgba(90, 20, 0, 0.6),
+			0 0 10px rgba(255, 106, 31, 0.3);
 	}
 	.start-btn:disabled {
-		opacity: 0.5;
+		filter: grayscale(0.55) brightness(0.7);
+		box-shadow:
+			inset 0 2px 0 rgba(255, 210, 130, 0.2),
+			inset 0 -3px 0 rgba(110, 30, 0, 0.35);
 	}
 
 	.sidebar-footer {
@@ -200,14 +250,14 @@
 	.footer-link-btn {
 		background: none;
 		border: none;
-		color: rgba(244, 236, 216, 0.4);
+		color: var(--ash-dim);
 		font-size: 10.5px;
-		letter-spacing: 1px;
+		letter-spacing: 2px;
 		text-decoration: underline;
 		padding: 4px;
 	}
 	.footer-link-btn:active {
-		color: var(--gold);
+		color: var(--dawnstone);
 	}
 
 	@media (min-width: 768px) {
@@ -218,27 +268,32 @@
 			/* 与右侧等宽 */
 			flex: 1 1 0;
 			width: auto;
-			max-width: none; 
+			max-width: none;
 			flex-shrink: 0;
 			transform: none !important;
-			/* border-right: 2px solid #6B4A2B; */
-			/* 牛皮笔记本封面质感 */
-			background-color: #33241A;
+			/* 古砖机械台板：四角铆钉 + 余烬缝 + 砖石纹理 */
+			background-color: var(--wood-dark);
 			background-image:
-				radial-gradient(ellipse at 50% 0%, rgba(120, 84, 52, 0.35), transparent 60%),
-				radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.4)),
-				linear-gradient(180deg, rgba(74, 51, 34, 0.55), rgba(43, 28, 18, 0.7)),
-				url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='l'><feTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='4' seed='7'/><feColorMatrix values='0 0 0 0 0.16 0 0 0 0 0.10 0 0 0 0 0.05 0 0 0 0.5 0'/></filter><rect width='100%' height='100%' filter='url(%23l)'/></svg>");
+				radial-gradient(circle 4px at 22px 22px, #f0d08a 0%, #8a5f28 55%, transparent 60%),
+				radial-gradient(circle 4px at calc(100% - 30px) 22px, #f0d08a 0%, #8a5f28 55%, transparent 60%),
+				radial-gradient(circle 4px at 22px calc(100% - 22px), #f0d08a 0%, #8a5f28 55%, transparent 60%),
+				radial-gradient(circle 4px at calc(100% - 30px) calc(100% - 22px), #f0d08a 0%, #8a5f28 55%, transparent 60%),
+				linear-gradient(90deg, transparent, rgba(255, 140, 60, 0.05) 92%, rgba(255, 106, 31, 0.14)),
+				linear-gradient(180deg, rgba(12, 7, 4, 0.78), rgba(16, 9, 5, 0.88)),
+				url('/textures/block_archaic_bricks.png');
+			background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat, repeat, repeat;
+			background-size: auto, auto, auto, auto, auto, auto, 64px 64px;
+			image-rendering: pixelated;
 		}
-		/* 封面烫金双线框 */
+		/* 台板内嵌黄铜细框 */
 		.sidebar::before {
 			content: '';
 			position: absolute;
 			inset: 12px 20px 12px 12px;
-			border: 1px solid rgba(201, 169, 97, 0.35);
-			outline: 1px solid rgba(201, 169, 97, 0.14);
+			border: 1px solid rgba(201, 149, 68, 0.3);
+			outline: 1px solid rgba(201, 149, 68, 0.12);
 			outline-offset: 3px;
-			border-radius: 3px;
+			border-radius: 2px;
 			pointer-events: none;
 		}
 	}

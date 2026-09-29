@@ -65,7 +65,8 @@
 		class="drawer-toggle"
 		aria-label="打开设置面板"
 		aria-expanded={ui.drawerClosed ? 'false' : 'true'}
-		onclick={toggleDrawer}>⚗</button
+		onclick={toggleDrawer}
+		><img class="toggle-sprite" src="/textures/item_ember_dial.png" alt="" /></button
 	>
 	<div
 		class="drawer-mask"
@@ -84,7 +85,12 @@
 
 		{#if !inGame}
 			<div class="empty-stage">
-				<div class="empty-rune">⚗</div>
+				<img
+					class="empty-crystal"
+					src="/textures/item_ember_cluster.png"
+					alt=""
+					aria-hidden="true"
+				/>
 				<div class="empty-hint">请于左侧设置参数 · 点击「开始推测」</div>
 				<div class="resume-hint hidden"></div>
 			</div>
@@ -129,7 +135,9 @@
 
 				{#if game.computing}
 					<div class="computing-panel">
-						<div class="computing-label">余烬推演中</div>
+						<div class="computing-label">
+							<img class="computing-heat" src="/textures/gui_heat_bar.png" alt="" />余烬推演中
+						</div>
 						<div class="computing-track"><div class="computing-fill"></div></div>
 					</div>
 				{/if}
@@ -155,32 +163,45 @@
 		position: relative;
 	}
 
+	/* 余烬晶体切换按钮：像素化暗色方块 */
 	.drawer-toggle {
 		position: fixed;
 		top: 14px;
 		left: 14px;
 		width: 44px;
 		height: 44px;
-		background: linear-gradient(135deg, var(--wood-mid), var(--wood-dark));
-		border: 1px solid var(--gold);
-		border-radius: 8px;
-		color: var(--gold);
-		font-size: 20px;
+		background: linear-gradient(180deg, #26170b, #170d06);
+		border: 1px solid rgba(201, 149, 68, 0.45);
+		border-radius: 3px;
+		color: var(--dawnstone);
+		font-size: 18px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		z-index: 70;
-		box-shadow: 0 2px 8px var(--shadow);
+		box-shadow:
+			inset 0 1px 0 rgba(255, 190, 110, 0.18),
+			inset 0 -2px 0 rgba(0, 0, 0, 0.55),
+			0 2px 8px rgba(0, 0, 0, 0.45);
 		transition: transform 200ms ease;
+		text-shadow: 0 0 8px rgba(242, 193, 78, 0.45);
 	}
 	.drawer-toggle:active {
-		transform: scale(0.92);
+		transform: translateY(1px) scale(0.95);
+	}
+	.toggle-sprite {
+		width: 22px;
+		height: 22px;
+		image-rendering: pixelated;
+		filter: drop-shadow(0 0 5px rgba(255, 140, 40, 0.55));
 	}
 
 	.drawer-mask {
 		position: fixed;
 		inset: 0;
-		background: rgba(26, 15, 8, 0.55);
+		background: rgba(5, 2, 1, 0.65);
+		backdrop-filter: blur(2px);
+		-webkit-backdrop-filter: blur(2px);
 		opacity: 1;
 		pointer-events: auto;
 		transition: opacity 280ms ease;
@@ -191,6 +212,7 @@
 		pointer-events: none;
 	}
 
+	/* 主舞台 = 熔炉台面（砖纹 + 余烬漫射） */
 	.main-stage {
 		flex: 1;
 		padding: 70px 16px 24px;
@@ -201,24 +223,29 @@
 		max-width: 720px;
 		margin: 0 auto;
 		width: 100%;
-		/* 羊皮纸质感 · 中世纪神秘学手稿 */
-		background-color: var(--parchment);
+		background-color: #140b06;
 		background-image:
-			radial-gradient(ellipse at 18% 12%, rgba(139, 58, 31, 0.10), transparent 55%),
-			radial-gradient(ellipse at 82% 88%, rgba(90, 58, 26, 0.12), transparent 55%),
-			radial-gradient(ellipse at center, rgba(255, 246, 220, 0.35), rgba(196, 168, 110, 0.28)),
-			url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' seed='11'/><feColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.33 0 0 0 0 0.17 0 0 0 0.16 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>");
+			/* 地心余烬（自下而上漫射） */
+			radial-gradient(ellipse 90% 40% at 50% 110%, rgba(255, 106, 31, 0.18), transparent 62%),
+			radial-gradient(ellipse at 18% 12%, rgba(210, 105, 30, 0.08), transparent 55%),
+			radial-gradient(ellipse at 82% 88%, rgba(139, 58, 31, 0.10), transparent 55%),
+			/* 暗化叠层 + 砖纹 */
+			linear-gradient(180deg, rgba(10, 5, 2, 0.60), rgba(10, 5, 2, 0.45)),
+			url('/textures/block_caminite_bricks.png');
+		background-size: auto, auto, auto, auto, 64px 64px;
 		background-attachment: fixed;
+		image-rendering: pixelated;
 	}
 
-	/* 深色主题：午夜古卷质感（保留纤维纹理，整体压暗） */
-	:global([data-theme='dark']) .main-stage {
-		background-color: #1a120b;
+	/* 浅色主题：白蜡灰烬台面（砖纹洗白） */
+	:global([data-theme='light']) .main-stage {
+		background-color: #CDBD97;
 		background-image:
-			radial-gradient(ellipse at 18% 12%, rgba(210, 105, 30, 0.07), transparent 55%),
-			radial-gradient(ellipse at 82% 88%, rgba(139, 58, 31, 0.10), transparent 55%),
-			radial-gradient(ellipse at center, rgba(62, 44, 26, 0.35), rgba(16, 10, 5, 0.45)),
-			url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' seed='11'/><feColorMatrix values='0 0 0 0 0.55 0 0 0 0 0.42 0 0 0 0 0.24 0 0 0 0.10 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>");
+			radial-gradient(ellipse 90% 40% at 50% 110%, rgba(255, 106, 31, 0.09), transparent 62%),
+			radial-gradient(ellipse at 18% 12%, rgba(210, 105, 30, 0.06), transparent 55%),
+			radial-gradient(ellipse at 82% 88%, rgba(139, 58, 31, 0.09), transparent 55%),
+			linear-gradient(180deg, rgba(221, 208, 169, 0.74), rgba(202, 189, 147, 0.62)),
+			url('/textures/block_caminite_bricks.png');
 	}
 
 	.stage-header {
@@ -226,17 +253,21 @@
 		flex-shrink: 0;
 	}
 	.stage-title {
-		font-size: 22px;
-		font-weight: 700;
+		font-size: 24px;
 		color: var(--text-ink);
-		letter-spacing: 4px;
+		letter-spacing: 5px;
+		background: linear-gradient(180deg, #ffe1a0 0%, var(--dawnstone) 45%, var(--ember) 90%);
+		-webkit-background-clip: text;
+		background-clip: text;
+		color: transparent;
+		filter: drop-shadow(0 2px 0 rgba(40, 12, 0, 0.9)) drop-shadow(0 0 10px rgba(255, 120, 30, 0.3));
 	}
 	.stage-hint {
 		font-size: 11px;
 		color: var(--text-mute);
 		margin-top: 6px;
-		opacity: 0.8;
-		letter-spacing: 1px;
+		letter-spacing: 2px;
+		text-shadow: 0 0 6px rgba(255, 140, 40, 0.15);
 	}
 
 	.empty-stage {
@@ -245,35 +276,40 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		gap: 16px;
+		gap: 18px;
 		color: var(--text-mute);
 		text-align: center;
 		padding: 40px 20px;
 	}
-	.empty-rune {
-		font-size: 64px;
-		color: var(--brass);
-		opacity: 0.6;
-		animation: pulse 2.4s ease-in-out infinite;
+	/* 待机态：真实余烬晶簇精灵图 */
+	.empty-crystal {
+		width: 64px;
+		height: 64px;
+		image-rendering: pixelated;
+		filter:
+			drop-shadow(0 0 10px rgba(255, 106, 31, 0.55))
+			drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
+		animation: crystalPulse 2.6s ease-in-out infinite;
 	}
-	@keyframes pulse {
+	@keyframes crystalPulse {
 		0%,
 		100% {
-			opacity: 0.4;
-			transform: scale(1);
+			opacity: 0.6;
+			filter: drop-shadow(0 0 8px rgba(255, 106, 31, 0.4)) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5)) brightness(0.9);
 		}
 		50% {
-			opacity: 0.75;
-			transform: scale(1.08);
+			opacity: 1;
+			filter: drop-shadow(0 0 16px rgba(255, 106, 31, 0.75)) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5)) brightness(1.15);
 		}
 	}
 	.empty-hint {
-		font-size: 13px;
-		letter-spacing: 2px;
+		font-size: 12.5px;
+		letter-spacing: 3px;
+		color: var(--ash);
 	}
 	.resume-hint {
 		font-size: 11.5px;
-		color: var(--ember-red);
+		color: var(--ember-hot);
 		letter-spacing: 1px;
 	}
 
@@ -285,6 +321,7 @@
 		min-height: 0;
 	}
 
+	/* 操作按钮组：暗色凸起方块 */
 	.action-row {
 		display: flex;
 		gap: 8px;
@@ -292,55 +329,73 @@
 	}
 	.action-btn {
 		flex: 1;
-		padding: 9px 6px;
-		background: rgba(244, 236, 216, var(--glass-alpha));
-		backdrop-filter: blur(var(--glass-blur));
-		-webkit-backdrop-filter: blur(var(--glass-blur));
+		padding: 10px 6px;
+		background: linear-gradient(180deg, var(--card-top), var(--card-bottom));
 		border: 1px solid var(--card-border);
-		border-radius: 7px;
+		border-radius: 3px;
 		color: var(--text-ink);
 		font-size: 12px;
 		font-weight: 600;
 		letter-spacing: 1px;
+		box-shadow:
+			inset 0 1px 0 rgba(255, 190, 110, 0.1),
+			inset 0 -2px 0 rgba(0, 0, 0, 0.4),
+			0 2px 5px rgba(0, 0, 0, 0.35);
 		transition: all 180ms ease;
 	}
+	.action-btn:hover {
+		border-color: var(--dawnstone);
+		box-shadow:
+			inset 0 1px 0 rgba(255, 210, 130, 0.2),
+			inset 0 -2px 0 rgba(0, 0, 0, 0.4),
+			0 0 12px rgba(255, 106, 31, 0.25);
+	}
 	.action-btn:active {
-		transform: scale(0.96);
+		transform: translateY(1px) scale(0.97);
+		box-shadow:
+			inset 0 2px 4px rgba(0, 0, 0, 0.5);
 	}
 
+	/* 状态栏：机件读数盘 */
 	.status-line {
 		display: flex;
 		justify-content: space-around;
 		gap: 8px;
 		padding: 10px 12px;
 		background: var(--status-bg);
-		backdrop-filter: blur(var(--glass-blur));
-		-webkit-backdrop-filter: blur(var(--glass-blur));
-		border: 1px solid rgba(166, 124, 63, 0.25);
-		border-radius: 8px;
+		border: 1px solid var(--card-border);
+		border-radius: 3px;
 		flex-shrink: 0;
+		box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.45);
 	}
 	.status-item {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 2px;
+		gap: 3px;
 		flex: 1;
 	}
 	.status-key {
-		font-size: 10px;
+		font-size: 9px;
 		color: var(--text-mute);
-		letter-spacing: 1px;
+		letter-spacing: 2px;
+		text-transform: uppercase;
 	}
 	.status-val {
-		font-size: 16px;
+		font-size: 14px;
 		font-weight: 700;
-		color: var(--ember-red);
+		color: var(--num-hot);
+		font-family: 'Press Start 2P', 'Courier New', monospace;
+		letter-spacing: 1px;
+		text-shadow: 0 0 8px rgba(255, 140, 40, 0.45);
 	}
 	.status-val.small {
-		font-size: 12px;
+		font-size: 10px;
+		font-family: 'ZCOOL QingKe HuangYou', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+		text-shadow: none;
 	}
 
+	/* 推演中：余烬能量管 */
 	.computing-panel {
 		display: flex;
 		flex-direction: column;
@@ -349,9 +404,18 @@
 		padding: 10px 4px 2px;
 	}
 	.computing-label {
-		color: var(--text-mute);
+		color: var(--ash);
 		font-size: 12.5px;
 		letter-spacing: 2px;
+		display: flex;
+		align-items: center;
+		gap: 6px;
+	}
+	.computing-heat {
+		width: 16px;
+		height: 16px;
+		image-rendering: pixelated;
+		filter: drop-shadow(0 0 4px rgba(255, 106, 31, 0.6));
 	}
 	.computing-label::after {
 		content: '...';
@@ -375,16 +439,18 @@
 		width: 100%;
 		max-width: 240px;
 		height: 5px;
-		border-radius: 3px;
-		background: rgba(166, 124, 63, 0.25);
+		border-radius: 1px;
+		background: #0a0502;
+		border: 1px solid rgba(201, 149, 68, 0.25);
 		overflow: hidden;
+		box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
 	}
 	.computing-fill {
 		height: 100%;
 		width: 40%;
-		border-radius: 3px;
-		background: linear-gradient(90deg, var(--ember-orange), var(--gold));
+		background: linear-gradient(90deg, var(--ember-deep), var(--ember), var(--ember-hot));
 		animation: computingSlide 1.1s ease-in-out infinite;
+		box-shadow: 0 0 10px rgba(255, 106, 31, 0.6);
 	}
 	@keyframes computingSlide {
 		0% {
@@ -395,37 +461,56 @@
 		}
 	}
 
+	/* 提交按钮：炽热余烬铸块 */
 	.submit-btn {
 		width: 100%;
 		padding: 14px;
-		background: linear-gradient(135deg, var(--ember-red) 0%, var(--ember-orange) 100%);
-		border: 1px solid var(--gold);
-		border-radius: 8px;
-		color: var(--cream);
-		font-size: 15px;
-		font-weight: 700;
-		letter-spacing: 3px;
-		box-shadow: 0 4px 12px rgba(139, 58, 31, 0.5);
-		transition: all 200ms ease;
+		background: linear-gradient(180deg, #ff8a30 0%, var(--ember) 45%, var(--ember-deep) 100%);
+		border: 2px solid #31170a;
+		border-radius: 3px;
+		color: #fff3d8;
+		font-family: 'ZCOOL QingKe HuangYou', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+		font-size: 16px;
+		letter-spacing: 4px;
+		text-shadow: 0 2px 0 rgba(70, 20, 0, 0.65);
+		box-shadow:
+			inset 0 2px 0 rgba(255, 210, 130, 0.5),
+			inset 0 -3px 0 rgba(110, 30, 0, 0.55),
+			0 0 18px rgba(255, 106, 31, 0.4),
+			0 4px 10px var(--shadow);
+		transition: all 180ms ease;
 		flex-shrink: 0;
+	}
+	.submit-btn:hover:not(:disabled) {
+		filter: brightness(1.08);
+		box-shadow:
+			inset 0 2px 0 rgba(255, 210, 130, 0.5),
+			inset 0 -3px 0 rgba(110, 30, 0, 0.55),
+			0 0 26px rgba(255, 106, 31, 0.6),
+			0 4px 10px var(--shadow);
 	}
 	.submit-btn:active {
 		transform: translateY(2px);
-		box-shadow: 0 2px 6px rgba(139, 58, 31, 0.5);
+		box-shadow:
+			inset 0 2px 5px rgba(90, 20, 0, 0.6),
+			0 0 10px rgba(255, 106, 31, 0.3);
 	}
 	.submit-btn:disabled {
-		opacity: 0.5;
+		opacity: 0.45;
 		cursor: not-allowed;
+		filter: grayscale(0.55) brightness(0.7);
+		box-shadow:
+			inset 0 2px 0 rgba(255, 210, 130, 0.2),
+			inset 0 -3px 0 rgba(110, 30, 0, 0.35);
 	}
 
 	@media (min-width: 768px) {
 		.app-shell {
 			flex-direction: row;
-			/* 摊开的笔记本 */
 			max-width: 1560px;
 			margin: 0 auto;
 			width: 100%;
-			box-shadow: 0 0 60px rgba(20, 10, 4, 0.5);
+			box-shadow: 0 0 60px rgba(0, 0, 0, 0.55);
 		}
 		.drawer-toggle {
 			display: none;
@@ -434,7 +519,6 @@
 			display: none !important;
 		}
 		.main-stage {
-			/* 与左侧等宽 */
 			flex: 1 1 0;
 			min-width: 0;
 			position: relative;
@@ -444,19 +528,20 @@
 			min-height: 100vh;
 			background-attachment: local;
 		}
-		/* 书籍装订中缝（靠左缘的内凹阴影 + 一道金线） */
+		/* 熔炉左侧：炽红余烬缝 */
 		.main-stage::before {
 			content: '';
 			position: absolute;
 			top: 0;
 			bottom: 0;
 			left: 0;
-			width: 26px;
+			width: 30px;
 			pointer-events: none;
 			background: linear-gradient(
 				to right,
-				rgba(20, 10, 4, 0.55),
-				rgba(42, 24, 16, 0.22) 40%,
+				rgba(5, 2, 1, 0.75),
+				rgba(255, 100, 20, 0.10) 12%,
+				rgba(255, 80, 10, 0.04) 50%,
 				rgba(42, 24, 16, 0) 100%
 			);
 		}
@@ -465,19 +550,19 @@
 			position: absolute;
 			top: 0;
 			bottom: 0;
-			left: 26px;
+			left: 30px;
 			width: 1px;
 			pointer-events: none;
 			background: linear-gradient(
 				to bottom,
-				rgba(201, 169, 97, 0),
-				rgba(201, 169, 97, 0.5) 12%,
-				rgba(201, 169, 97, 0.5) 88%,
-				rgba(201, 169, 97, 0)
+				rgba(255, 106, 31, 0),
+				rgba(255, 106, 31, 0.45) 12%,
+				rgba(255, 106, 31, 0.45) 88%,
+				rgba(255, 106, 31, 0)
 			);
 		}
 		.stage-title {
-			font-size: 28px;
+			font-size: 30px;
 		}
 	}
 </style>

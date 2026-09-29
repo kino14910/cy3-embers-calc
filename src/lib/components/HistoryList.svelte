@@ -108,12 +108,13 @@
 {/if}
 
 <style>
+	/* 推演史：玄武岩日志板 */
 	.history-card {
 		background: var(--history-bg);
 		backdrop-filter: blur(var(--glass-blur));
 		-webkit-backdrop-filter: blur(var(--glass-blur));
-		border: 1px solid rgba(166, 124, 63, 0.4);
-		border-radius: 10px;
+		border: 2px solid var(--card-border);
+		border-radius: 4px;
 		padding: 12px 14px;
 		flex: 1;
 		min-height: 180px;
@@ -121,6 +122,9 @@
 		overflow-y: auto;
 		display: flex;
 		flex-direction: column;
+		box-shadow:
+			inset 0 1px 0 var(--card-hi),
+			0 4px 14px var(--shadow);
 		scrollbar-width: none;
 		-ms-overflow-style: none;
 	}
@@ -130,11 +134,11 @@
 		display: none;
 	}
 	.history-title {
-		font-size: 10px;
+		font-family: 'ZCOOL QingKe HuangYou', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+		font-size: 11px;
 		color: var(--text-mute);
-		letter-spacing: 2px;
+		letter-spacing: 4px;
 		margin-bottom: 10px;
-		font-weight: 700;
 		text-transform: uppercase;
 		flex-shrink: 0;
 	}
@@ -152,10 +156,15 @@
 	.history-item {
 		padding: 10px 0;
 		font-size: 12px;
-		border-bottom: 1px dotted rgba(166, 124, 63, 0.35);
+		border-bottom: 1px solid rgba(0, 0, 0, 0.45);
+		box-shadow: inset 0 -1px 0 rgba(255, 170, 80, 0.05);
+	}
+	:global([data-theme='light']) .history-item {
+		border-bottom-color: rgba(90, 60, 20, 0.25);
 	}
 	.history-item:last-child {
 		border-bottom: none;
+		box-shadow: none;
 	}
 	.hist-top {
 		display: flex;
@@ -165,27 +174,30 @@
 		flex-wrap: wrap;
 	}
 	.history-num {
-		color: var(--ember-red);
-		font-weight: 700;
-		font-size: 11px;
-		min-width: 22px;
+		color: var(--dawnstone);
+		font-family: 'Press Start 2P', 'Courier New', monospace;
+		font-size: 9px;
+		min-width: 24px;
+		text-shadow: 0 0 6px rgba(242, 193, 78, 0.4);
 	}
 	.hist-blocks {
 		display: flex;
 		gap: 4px;
 		flex-wrap: wrap;
 	}
+	/* 历史元素块：像素砖 */
 	.hist-block {
 		width: 34px;
 		height: 26px;
-		border-radius: 4px;
-		border: 1px solid rgba(42, 24, 16, 0.5);
+		border-radius: 2px;
+		border: 1px solid rgba(0, 0, 0, 0.6);
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
 		box-shadow:
-			inset 0 -2px 4px rgba(0, 0, 0, 0.25),
+			inset 0 1px 0 rgba(255, 255, 255, 0.25),
+			inset 0 -2px 0 rgba(0, 0, 0, 0.35),
 			0 1px 2px var(--shadow);
 		gap: 1px;
 	}
@@ -213,9 +225,10 @@
 		gap: 10px;
 	}
 	.hist-fb-hl {
-		color: var(--ember-orange);
+		color: var(--num-hot);
 		font-weight: 600;
 		font-size: 11px;
+		text-shadow: 0 0 6px rgba(255, 140, 40, 0.35);
 	}
 	.hist-fb-pl {
 		color: var(--text-mute);
@@ -229,40 +242,47 @@
 		letter-spacing: 1px;
 		margin-left: auto;
 	}
+	/* 等待反馈：余烬虚线槽 */
 	.hist-pending {
-		background: rgba(210, 105, 30, 0.08);
-		border-radius: 6px;
+		background: rgba(255, 106, 31, 0.07);
+		border-radius: 3px;
 		padding: 10px 8px !important;
 		margin: 4px -4px;
-		border: 1px dashed var(--ember-orange);
+		border: 1px dashed rgba(255, 106, 31, 0.65);
+		box-shadow: inset 0 0 14px rgba(255, 106, 31, 0.1);
 	}
 	.hist-pending-tag {
-		color: var(--ember-red);
+		color: var(--num-hot);
 		font-size: 11px;
 		font-weight: 700;
 		letter-spacing: 2px;
-		animation: pulseTag 1.6s ease-in-out infinite;
+		animation: pulseTag 1.6s steps(3) infinite;
 	}
 	@keyframes pulseTag {
 		0%,
 		100% {
-			opacity: 0.6;
+			opacity: 0.55;
 		}
 		50% {
 			opacity: 1;
 		}
 	}
+	/* 真名揭晓：黎明石镶板 */
 	.hist-reveal {
-		background: linear-gradient(135deg, rgba(201, 169, 97, 0.18), rgba(210, 105, 30, 0.1));
-		border: 1px solid var(--gold) !important;
-		border-radius: 6px;
+		background: linear-gradient(135deg, rgba(242, 193, 78, 0.16), rgba(255, 106, 31, 0.1));
+		border: 1px solid var(--dawnstone) !important;
+		border-radius: 3px;
 		padding: 10px 8px !important;
 		margin: 4px -4px;
+		box-shadow:
+			0 0 14px rgba(242, 193, 78, 0.25),
+			inset 0 0 10px rgba(242, 193, 78, 0.12);
 	}
 	.hist-reveal-tag {
-		color: var(--ember-red);
+		color: var(--dawnstone);
 		font-size: 11px;
 		font-weight: 700;
 		letter-spacing: 2px;
+		text-shadow: 0 0 8px rgba(242, 193, 78, 0.5);
 	}
 </style>

@@ -198,24 +198,32 @@
 </div>
 
 <style>
-	/* ==================== 一体式可搜索下拉框 ==================== */
+	/* ==================== 一体式可搜索下拉框（凹槽机件） ==================== */
 	/* 外框：视觉上的唯一控件（背景/边框/圆角都在这里） */
 	.combo {
 		position: relative;
 		display: flex;
 		align-items: center;
-		background: #1a0f08;
-		border: 1px solid rgba(201, 169, 97, 0.4);
-		border-radius: 8px;
-		transition: border-color 200ms ease;
+		background: var(--socket);
+		border: 1px solid rgba(201, 149, 68, 0.35);
+		border-radius: 3px;
+		box-shadow:
+			inset 0 2px 5px rgba(0, 0, 0, 0.75),
+			inset 0 -1px 0 rgba(255, 150, 60, 0.1);
+		transition:
+			border-color 200ms ease,
+			box-shadow 200ms ease;
 	}
 	.combo:focus-within {
-		border-color: var(--gold);
+		border-color: var(--dawnstone);
+		box-shadow:
+			inset 0 2px 5px rgba(0, 0, 0, 0.75),
+			0 0 12px rgba(242, 193, 78, 0.25);
 	}
 	/* 展开时：框底与列表贴合为一体 */
 	.combo.open {
-		border-color: var(--gold);
-		border-radius: 8px 8px 0 0;
+		border-color: var(--dawnstone);
+		border-radius: 3px 3px 0 0;
 	}
 	.combo.disabled {
 		opacity: 0.5;
@@ -227,15 +235,15 @@
 		min-width: 0;
 		background: transparent;
 		border: none;
-		color: var(--cream);
-		padding: 8px 4px 8px 12px;
+		color: var(--bone);
+		padding: 9px 4px 9px 12px;
 		font-size: 13px;
 		font-weight: 600;
 		font-family: inherit;
-		letter-spacing: 0.5px;
+		letter-spacing: 1px;
 	}
 	.combo-input::placeholder {
-		color: rgba(244, 236, 216, 0.4);
+		color: var(--ash-dim);
 	}
 	/* 焦点环由外框 focus-within 承担 */
 	.combo-input:focus,
@@ -250,7 +258,7 @@
 	.combo-arrow {
 		background: none;
 		border: none;
-		color: var(--gold);
+		color: var(--dawnstone);
 		font-size: 11px;
 		width: 32px;
 		padding: 0;
@@ -260,6 +268,7 @@
 		justify-content: center;
 		transition: rotate 240ms ease;
 		flex-shrink: 0;
+		text-shadow: 0 0 6px rgba(242, 193, 78, 0.5);
 	}
 	.combo-arrow:focus,
 	.combo-arrow:focus-visible {
@@ -277,13 +286,15 @@
 		right: -1px;
 		max-height: 240px;
 		overflow-y: auto;
-		background: #1a0f08;
-		border: 1px solid var(--gold);
-		border-top: 1px solid rgba(201, 169, 97, 0.3);
-		border-radius: 0 0 8px 8px;
+		background: #120b05;
+		border: 1px solid var(--dawnstone);
+		border-top: 1px solid rgba(201, 149, 68, 0.3);
+		border-radius: 0 0 3px 3px;
 		list-style: none;
 		z-index: 40;
-		box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+		box-shadow:
+			0 8px 20px rgba(0, 0, 0, 0.65),
+			0 0 16px rgba(242, 193, 78, 0.15);
 		scrollbar-width: thin;
 		scrollbar-color: var(--brass) transparent;
 	}
@@ -294,18 +305,18 @@
 		gap: 8px;
 		padding: 8px 12px;
 		font-size: 12.5px;
-		color: var(--cream);
+		color: var(--bone);
 		cursor: pointer;
-		border-bottom: 1px solid rgba(201, 169, 97, 0.15);
+		border-bottom: 1px solid rgba(201, 149, 68, 0.14);
 	}
 	.combo-opt:last-child {
 		border-bottom: none;
 	}
 	.combo-opt.active {
-		background: rgba(201, 169, 97, 0.22);
+		background: rgba(255, 106, 31, 0.16);
 	}
 	.combo-opt.selected {
-		background: rgba(201, 169, 97, 0.32);
+		background: rgba(201, 149, 68, 0.26);
 		font-weight: 700;
 	}
 	.opt-main {
@@ -320,11 +331,12 @@
 		height: 22px;
 		flex-shrink: 0;
 		object-fit: contain;
-		border-radius: 3px;
+		border-radius: 2px;
 		image-rendering: pixelated;
-		background: rgba(0, 0, 0, 0.25);
-		border: 1px solid rgba(201, 169, 97, 0.25);
+		background: rgba(0, 0, 0, 0.4);
+		border: 1px solid rgba(201, 149, 68, 0.3);
 		padding: 1px;
+		box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
 	}
 	.opt-name {
 		letter-spacing: 0.5px;
@@ -334,24 +346,25 @@
 	}
 	.opt-meta {
 		font-size: 10px;
-		color: rgba(244, 236, 216, 0.45);
+		color: var(--ash-dim);
 		white-space: nowrap;
 		flex-shrink: 0;
 	}
 	.combo-empty {
 		padding: 12px;
 		font-size: 12px;
-		color: rgba(244, 236, 216, 0.4);
+		color: var(--ash-dim);
 		text-align: center;
 	}
 
 	.preset-active-tag {
 		margin-top: 8px;
 		font-size: 10.5px;
-		color: var(--gold);
+		color: var(--dawnstone);
 		display: flex;
 		align-items: center;
 		gap: 8px;
 		flex-wrap: wrap;
+		text-shadow: 0 0 6px rgba(242, 193, 78, 0.3);
 	}
 </style>
